@@ -20,7 +20,10 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           script: |
-            cd server/bin
+            cd server
+            git fetch --all
+            git reset --hard origin/main
+            cd bin
             chmod +x server.sh
             ./server.sh
      
