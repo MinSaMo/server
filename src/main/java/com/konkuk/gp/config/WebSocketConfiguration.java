@@ -22,12 +22,10 @@ public class WebSocketConfiguration implements WebSocketConfigurer {
                 .setAllowedOrigins("*");
     }
 
-    @Bean
     public TextMessageHandler clientSocketHandler(SessionRegistry sessionRegistry) {
         return new ClientSocketHandler(sessionRegistry,SessionType.CLIENT);
     }
 
-    @Bean
     public TextMessageHandler aiSocketHandler(SessionRegistry sessionRegistry) {
         return new AiSocketHandler(sessionRegistry, SessionType.AI);
     }

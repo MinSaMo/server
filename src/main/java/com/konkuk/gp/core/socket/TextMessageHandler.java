@@ -41,6 +41,11 @@ public class TextMessageHandler extends TextWebSocketHandler {
 
         try {
             registry.register(session, sessionType);
+            sendMessage(session, Message.<String>builder()
+                    .sender(Message.SENDER_SERVER)
+                    .data("Conn Success")
+                    .build());
+
         } catch (IllegalArgumentException e) {
             sendError(session, ErrorMessage.SOCKET_ALREADY_USED);
             session.close();

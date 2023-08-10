@@ -20,7 +20,6 @@ public class ClientSocketHandler extends TextMessageHandler {
         super(registry, type);
     }
 
-    //양방향 데이터 통신
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
         Message message = null;
