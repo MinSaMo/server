@@ -2,6 +2,7 @@ package com.konkuk.gp.ai;
 
 import com.konkuk.gp.ai.data.AiRequestData;
 import com.konkuk.gp.client.data.ClientResponseData;
+import com.konkuk.gp.client.data.TriggerType;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
 import com.konkuk.gp.core.socket.SessionRegistry;
@@ -45,6 +46,7 @@ public class AiSocketHandler extends TextMessageHandler {
                         .isFinish(true)
                         .script("It's test script")
                         .type("advice")
+                        .triggerType(TriggerType.BY_CAPTION)
                         .build());
 
         try {

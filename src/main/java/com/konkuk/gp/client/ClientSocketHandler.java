@@ -2,6 +2,7 @@ package com.konkuk.gp.client;
 
 import com.konkuk.gp.client.data.ClientRequestData;
 import com.konkuk.gp.client.data.ClientResponseData;
+import com.konkuk.gp.client.data.TriggerType;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
 import com.konkuk.gp.core.socket.SessionRegistry;
@@ -46,6 +47,7 @@ public class ClientSocketHandler extends TextMessageHandler {
                         .isFinish(true)
                         .script("It's test script")
                         .type("daily")
+                        .triggerType(TriggerType.BY_USER)
                         .build());
         sendMessage(session, responseData);
     }

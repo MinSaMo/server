@@ -5,11 +5,13 @@ import com.konkuk.gp.core.message.MessageManager;
 import com.konkuk.gp.global.Utils;
 import com.konkuk.gp.global.exception.ErrorMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+@Slf4j
 @RequiredArgsConstructor
 public class TextMessageHandler extends TextWebSocketHandler {
     protected final SessionRegistry registry;
@@ -45,7 +47,6 @@ public class TextMessageHandler extends TextWebSocketHandler {
                     .sender(Message.SENDER_SERVER)
                     .data("Conn Success")
                     .build());
-
         } catch (IllegalArgumentException e) {
             sendError(session, ErrorMessage.SOCKET_ALREADY_USED);
             session.close();
