@@ -24,6 +24,6 @@ jobs:
             git fetch --all
             git reset --hard origin/main
             cd bin
-            chmod +x server.sh
-            ./server.sh
+            chmod +x ci.sh
+            ./ci.sh
      
