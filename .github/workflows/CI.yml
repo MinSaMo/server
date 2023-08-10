@@ -1,0 +1,26 @@
+name: BACK_DEPLOY
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches:
+      - main
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  SSH:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: git cloning...
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_PEM }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          script: |
+            cd server/bin
+            chmod +x server.sh
+            ./server.sh
+     
