@@ -1,5 +1,6 @@
 package com.konkuk.gp.core.socket;
 
+import com.konkuk.gp.core.gpt.ChatGptService;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
 import com.konkuk.gp.global.Utils;
@@ -16,7 +17,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class TextMessageHandler extends TextWebSocketHandler {
     protected final SessionRegistry registry;
     protected final SessionType sessionType;
-
+    protected final ChatGptService chatGptService;
      protected void sendError(WebSocketSession session, ErrorMessage errMsg) {
         try {
             session.sendMessage(new TextMessage(Utils.getString(MessageManager.error(errMsg))));

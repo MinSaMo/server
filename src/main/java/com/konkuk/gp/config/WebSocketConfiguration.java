@@ -1,11 +1,8 @@
 package com.konkuk.gp.config;
 
-import com.konkuk.gp.ai.AiSocketHandler;
-import com.konkuk.gp.client.ClientSocketHandler;
-import com.konkuk.gp.core.socket.SessionRegistry;
-import com.konkuk.gp.core.socket.SessionType;
 import com.konkuk.gp.core.socket.TextMessageHandler;
-import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -15,23 +12,24 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @EnableWebSocket
 public class WebSocketConfiguration implements WebSocketConfigurer {
 
+    private final TextMessageHandler clientSocketHandler;
+    private final TextMessageHandler aiSocketHandler;
+    private final String SOCKET_URL_CLIENT = "/client";
+    private final String SOCKET_URL_AI = "/ai";
+
+    @Autowired
+    public WebSocketConfiguration(
+            @Qualifier("client") TextMessageHandler clientSocketHandler,
+            @Qualifier("ai") TextMessageHandler aiSocketHandler) {
+        this.clientSocketHandler = clientSocketHandler;
+        this.aiSocketHandler = aiSocketHandler;
+    }
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(clientSocketHandler(sessionRegistry()), "/client")
-                .addHandler(aiSocketHandler(sessionRegistry()), "/ai")
+        registry.addHandler(clientSocketHandler, SOCKET_URL_CLIENT)
+                .addHandler(aiSocketHandler, SOCKET_URL_AI)
                 .setAllowedOrigins("*");
     }
 
-    public TextMessageHandler clientSocketHandler(SessionRegistry sessionRegistry) {
-        return new ClientSocketHandler(sessionRegistry,SessionType.CLIENT);
-    }
-
-    public TextMessageHandler aiSocketHandler(SessionRegistry sessionRegistry) {
-        return new AiSocketHandler(sessionRegistry, SessionType.AI);
-    }
-
-    @Bean
-    public SessionRegistry sessionRegistry() {
-        return new SessionRegistry();
-    }
 }

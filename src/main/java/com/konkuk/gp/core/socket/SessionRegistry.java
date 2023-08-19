@@ -1,11 +1,13 @@
 package com.konkuk.gp.core.socket;
 
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class SessionRegistry {
     private final Map<SessionType, WebSocketSession> sessionMap;
 
