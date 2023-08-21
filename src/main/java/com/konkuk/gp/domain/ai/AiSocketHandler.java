@@ -1,8 +1,9 @@
-package com.konkuk.gp.ai;
+package com.konkuk.gp.domain.ai;
 
-import com.konkuk.gp.ai.data.AiRequestData;
-import com.konkuk.gp.client.data.ClientResponseData;
-import com.konkuk.gp.client.data.TriggerType;
+import com.konkuk.gp.core.gpt.enums.ChatType;
+import com.konkuk.gp.domain.ai.dto.AiRequestDto;
+import com.konkuk.gp.domain.client.dto.ClientResponseDto;
+import com.konkuk.gp.domain.client.dto.TriggerType;
 import com.konkuk.gp.core.gpt.ChatGptService;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
@@ -29,9 +30,9 @@ public class AiSocketHandler extends TextMessageHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
-        Message<AiRequestData> message;
+        Message<AiRequestDto> message;
         try {
-            message = Utils.getObject(textMessage.getPayload(), AiRequestData.class);
+            message = Utils.getObject(textMessage.getPayload(), AiRequestDto.class);
         } catch (Exception e) {
             sendError(session, ErrorMessage.INVALID_MESSAGE_FORMAT);
             return;
@@ -42,13 +43,15 @@ public class AiSocketHandler extends TextMessageHandler {
             return;
         }
 
-        AiRequestData data = message.getData();
-        log.info("Received caption : " + data.getCaption());
+        AiRequestDto data = message.getData();
+        log.info("[AI] Received caption : " + data.getCaption());
 
         String response = chatGptService.simpleChat(data.getCaption());
+        int dialogType = chatGptService.determineIntense(data.getCaption());
+        ChatType type = ChatType.of(dialogType);
 
-        Message<ClientResponseData> responseData = MessageManager.response(
-                ClientResponseData.builder()
+        Message<ClientResponseDto> responseData = MessageManager.response(
+                ClientResponseDto.builder()
                         .dialogId(1L)
                         .isFinish(true)
                         .script(response)
@@ -60,7 +63,7 @@ public class AiSocketHandler extends TextMessageHandler {
             WebSocketSession client = registry.getSession(SessionType.CLIENT)
                     .orElseThrow(IllegalAccessError::new);
             sendMessage(client, responseData);
-            log.info("SEND RESPONSE TO CLIENT:" + response);
+            log.info("[AI] SEND RESPONSE TO CLIENT:" + response);
         } catch (IllegalAccessError e) {
             sendError(session, ErrorMessage.CLIENT_SOCKET_NOT_FOUND);
         }

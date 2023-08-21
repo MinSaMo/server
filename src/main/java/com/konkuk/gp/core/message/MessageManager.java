@@ -1,6 +1,6 @@
 package com.konkuk.gp.core.message;
 
-import com.konkuk.gp.client.data.ClientResponseData;
+import com.konkuk.gp.domain.client.dto.ClientResponseDto;
 import com.konkuk.gp.global.exception.ErrorData;
 import com.konkuk.gp.global.exception.ErrorMapper;
 import com.konkuk.gp.global.exception.ErrorMessage;
@@ -13,7 +13,7 @@ public class MessageManager {
                 .build());
     }
 
-    public static Message<ClientResponseData> response(ClientResponseData data) {
+    public static Message<ClientResponseDto> response(ClientResponseDto data) {
         return Message.of(data);
     }
 

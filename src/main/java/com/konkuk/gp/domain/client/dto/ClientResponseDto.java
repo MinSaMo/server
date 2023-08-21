@@ -1,10 +1,10 @@
-package com.konkuk.gp.client.data;
+package com.konkuk.gp.domain.client.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class ClientResponseData {
+public class ClientResponseDto {
     private String script;
     // TODO : enum
     private String type;
@@ -13,7 +13,7 @@ public class ClientResponseData {
     private Long dialogId;
 
     @Builder
-    public ClientResponseData(String script, String type, boolean isFinish, TriggerType triggerType, Long dialogId) {
+    public ClientResponseDto(String script, String type, boolean isFinish, TriggerType triggerType, Long dialogId) {
         this.script = script;
         this.type = type;
         this.isFinish = isFinish;

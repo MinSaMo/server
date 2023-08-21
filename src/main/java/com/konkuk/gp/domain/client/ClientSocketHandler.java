@@ -1,8 +1,9 @@
-package com.konkuk.gp.client;
+package com.konkuk.gp.domain.client;
 
-import com.konkuk.gp.client.data.ClientRequestData;
-import com.konkuk.gp.client.data.ClientResponseData;
-import com.konkuk.gp.client.data.TriggerType;
+import com.konkuk.gp.core.gpt.enums.ChatType;
+import com.konkuk.gp.domain.client.dto.ClientRequestDto;
+import com.konkuk.gp.domain.client.dto.ClientResponseDto;
+import com.konkuk.gp.domain.client.dto.TriggerType;
 import com.konkuk.gp.core.gpt.ChatGptService;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
@@ -33,7 +34,7 @@ public class ClientSocketHandler extends TextMessageHandler {
         Message message = null;
 
         try {
-            message = Utils.getObject(textMessage.getPayload(), ClientRequestData.class);
+            message = Utils.getObject(textMessage.getPayload(), ClientRequestDto.class);
         } catch (Exception e) {
             sendError(session,ErrorMessage.INVALID_MESSAGE_FORMAT);
             return;
@@ -44,18 +45,20 @@ public class ClientSocketHandler extends TextMessageHandler {
             return;
         }
 
-        ClientRequestData data = (ClientRequestData) message.getData();
-        log.info("Received script : " + data.getScript());
-        log.info("Received dialogId : " + data.getDialogId());
+        ClientRequestDto data = (ClientRequestDto) message.getData();
+        log.info("[CLIENT] Received script : " + data.getScript());
+        log.info("[CLIENT] Received dialogId : " + data.getDialogId());
 
         String response = chatGptService.simpleChat(data.getScript());
+        int dialogType = chatGptService.determineIntense(data.getScript());
+        ChatType type = ChatType.of(dialogType);
 
-        Message<ClientResponseData> responseData = MessageManager.response(
-                ClientResponseData.builder()
+        Message<ClientResponseDto> responseData = MessageManager.response(
+                ClientResponseDto.builder()
                         .dialogId(1L)
                         .isFinish(true)
                         .script(response)
-                        .type("daily")
+                        .type(type.getName())
                         .triggerType(TriggerType.BY_USER)
                         .build());
         sendMessage(session, responseData);

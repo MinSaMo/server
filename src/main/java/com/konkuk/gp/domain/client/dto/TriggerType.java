@@ -1,4 +1,4 @@
-package com.konkuk.gp.client.data;
+package com.konkuk.gp.domain.client.dto;
 
 import lombok.Getter;
 
