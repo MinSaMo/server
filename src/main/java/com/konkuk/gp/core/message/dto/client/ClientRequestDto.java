@@ -1,4 +1,4 @@
-package com.konkuk.gp.domain.client.dto;
+package com.konkuk.gp.core.message.dto.client;
 
 import lombok.*;
 

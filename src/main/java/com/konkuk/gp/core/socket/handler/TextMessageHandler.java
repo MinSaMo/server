@@ -1,10 +1,12 @@
-package com.konkuk.gp.core.socket;
+package com.konkuk.gp.core.socket.handler;
 
-import com.konkuk.gp.core.gpt.ChatGptService;
+import com.konkuk.gp.core.gpt.GptService;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
+import com.konkuk.gp.core.socket.SessionRegistry;
+import com.konkuk.gp.core.socket.SessionType;
 import com.konkuk.gp.global.Utils;
-import com.konkuk.gp.global.exception.ErrorMessage;
+import com.konkuk.gp.global.exception.socket.ErrorMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
@@ -17,7 +19,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class TextMessageHandler extends TextWebSocketHandler {
     protected final SessionRegistry registry;
     protected final SessionType sessionType;
-    protected final ChatGptService chatGptService;
+    protected final GptService chatGptService;
      protected void sendError(WebSocketSession session, ErrorMessage errMsg) {
         try {
             session.sendMessage(new TextMessage(Utils.getString(MessageManager.error(errMsg))));

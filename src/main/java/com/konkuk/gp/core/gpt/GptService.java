@@ -1,0 +1,155 @@
+package com.konkuk.gp.core.gpt;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.konkuk.gp.core.gpt.dto.DialogResponseDto;
+import com.konkuk.gp.core.gpt.dto.IntenseResponseDto;
+import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
+import com.konkuk.gp.core.gpt.enums.ChatType;
+import com.konkuk.gp.service.MemberService;
+import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
+import io.github.flashvayne.chatgpt.property.ChatgptProperties;
+import io.github.flashvayne.chatgpt.property.MultiChatProperties;
+import io.github.flashvayne.chatgpt.service.ChatgptService;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.*;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@ConfigurationProperties(prefix = "gpt.prompt.daily.param")
+public class GptService {
+
+    private final ChatgptService chatgptService;
+    private final ObjectMapper objectMapper;
+    private final MemberService memberService;
+    private final ChatgptProperties chatgptProperties;
+
+    private final String SYSTEM_INTENSE = "intense";
+    private final String SYSTEM_GLOBAL = "global";
+
+    public String simpleChat(String msg) {
+        return chatgptService.sendMessage(msg);
+    }
+
+    @Value("${gpt.system.intense}")
+    private String intenseSystemScript;
+    @Value("${gpt.system.global}")
+    private String globalSystemScript;
+    @Value("${gpt.prompt.daily.template}")
+    private String dailyPromptTemplate;
+    @Value("${gpt.system.information}")
+    private String infoSystemScript;
+
+    @Setter
+    private String userInformation;
+    @Setter
+    private String previousConversation;
+    @Setter
+    private String message;
+
+    public DialogResponseDto ask(String script, ChatType type, Long memberId, List<MultiChatMessage> currentDialog) {
+        switch (type) {
+            case DAILY, ADVICE -> {
+                return responseWithDailyChat(script, memberId, currentDialog);
+            }
+            case EMERGENCY -> {
+                return null;
+            }
+        }
+        throw new RuntimeException();
+    }
+
+    public ChatType determineIntense(String script) {
+        MultiChatMessage systemDefinition = getSystemDefinition(SYSTEM_INTENSE);
+        List<MultiChatMessage> messages = Arrays.asList(systemDefinition, new MultiChatMessage("user", script));
+        String response = chatgptService.multiChat(messages);
+        try {
+            IntenseResponseDto result = objectMapper.readValue(response, IntenseResponseDto.class);
+            return ChatType.of(result.answerTypeIndex());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected DialogResponseDto responseWithDailyChat(String script, Long memberId, List<MultiChatMessage> currentDialog) {
+        MultiChatMessage systemDefinition = getSystemDefinition(SYSTEM_GLOBAL);
+
+        Map<String, String> params = new HashMap<>();
+
+        params.put(message, script);
+        String information = memberService.getInformation(memberId);
+        params.put(userInformation, information);
+
+        String prompt = setPromptParams(dailyPromptTemplate, params);
+
+        List<MultiChatMessage> messages = new ArrayList<>();
+        messages.add(systemDefinition);
+        messages.addAll(currentDialog);
+        messages.add(new MultiChatMessage("user", prompt));
+
+        String response = chatgptService.multiChat(messages);
+        try {
+            return objectMapper.readValue(response, DialogResponseDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected String setPromptParams(String template, Map<String, String> params) {
+        String res = template;
+        for (String name : params.keySet()) {
+            res = res.replace(name, params.get(name));
+        }
+        return res;
+    }
+
+    public UserInformationResponseDto generateUserInformation(List<MultiChatMessage> dialog) {
+
+        MultiChatProperties multi = chatgptProperties.getMulti();
+
+        double originalTopP = multi.getTopP();
+        double originalTemperature = multi.getTemperature();
+
+        multi.setTopP(0.3);
+        multi.setTemperature(0.1);
+
+        ArrayList<MultiChatMessage> messages = new ArrayList<>(dialog);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("$currentTime", LocalDateTime.now().toString());
+        String system = setPromptParams(infoSystemScript, params);
+
+        messages.add(new MultiChatMessage("system", system));
+
+        String response = chatgptService.multiChat(messages);
+
+        multi.setTopP(originalTopP);
+        multi.setTemperature(originalTemperature);
+        try {
+            UserInformationResponseDto res = objectMapper.readValue(response, UserInformationResponseDto.class);
+            return res;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected MultiChatMessage getSystemDefinition(String type) {
+        switch (type) {
+            case SYSTEM_INTENSE -> {
+                return new MultiChatMessage("system", intenseSystemScript);
+            }
+            case SYSTEM_GLOBAL -> {
+                return new MultiChatMessage("system", globalSystemScript);
+            }
+        }
+        throw new RuntimeException();
+    }
+}

@@ -1,6 +1,6 @@
 package com.konkuk.gp.config;
 
-import com.konkuk.gp.core.socket.TextMessageHandler;
+import com.konkuk.gp.core.socket.handler.TextMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;

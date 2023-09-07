@@ -1,4 +1,4 @@
-package com.konkuk.gp.domain.ai.dto;
+package com.konkuk.gp.core.message.dto.ai;
 
 import lombok.Data;
 

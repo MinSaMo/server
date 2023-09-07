@@ -1,4 +1,4 @@
-package com.konkuk.gp.global.exception;
+package com.konkuk.gp.global.exception.socket;
 
 public class ErrorMapper {
     public static ErrorCode getCode(ErrorMessage message) {
