@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +37,10 @@ public class ClientSocketHandler extends TextMessageHandler {
         this.dialogManager = dialogManager;
     }
 
-    @PostConstruct
-    private void init() {
-        dialogManager.setMemberId(1L);
-    }
-
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 
-        Long memberId = 1L; // TODO : member Id 고정된거 바꾸자
+        Long memberId = dialogManager.getMemberId();
         Message message = null;
 
         Long dialogId;

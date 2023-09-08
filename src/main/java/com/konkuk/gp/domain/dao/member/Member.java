@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 public class Member {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "mb_id")
     private Long id;
 
@@ -29,4 +29,12 @@ public class Member {
 
     @OneToMany(mappedBy = "member")
     private List<PreferredFood> foodList = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

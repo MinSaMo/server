@@ -27,6 +27,7 @@ public class DialogManager {
     private boolean isRun;
     @Getter
     private Long dialogId;
+    @Getter
     @Setter
     private Long memberId;
     @Getter
