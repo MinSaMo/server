@@ -3,10 +3,7 @@ package com.konkuk.gp.service;
 import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
 import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.Disease;
-import com.konkuk.gp.domain.dao.member.Member;
-import com.konkuk.gp.domain.dao.member.MemberRepository;
-import com.konkuk.gp.domain.dao.member.PreferredFood;
-import com.konkuk.gp.domain.dao.member.PreferredFoodRepository;
+import com.konkuk.gp.domain.dao.member.*;
 import com.konkuk.gp.domain.dto.request.ChecklistCreateDto;
 import com.konkuk.gp.domain.dto.request.DiseaseCreateDto;
 import com.konkuk.gp.global.exception.NotFoundException;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +69,12 @@ public class MemberService {
     }
 
     @Transactional
+    public void completeChecklist(Long checklistId, Long memberId) {
+        Member member = findMemberById(memberId);
+        checklistService.completeChecklist(checklistId, member);
+    }
+
+    @Transactional
     public void addFood(String foodName, Long memberId) {
         Member member = findMemberById(memberId);
         PreferredFood food = PreferredFood.builder()
@@ -81,7 +85,7 @@ public class MemberService {
     }
 
     @Transactional
-    public String getInformation(Long memberId) {
+    public String getInformationString(Long memberId) {
         Member member = findMemberById(memberId);
 
         List<String> diseaseList = member.getDiseaseList().stream()
@@ -100,6 +104,12 @@ public class MemberService {
                 .toList();
 
         return informationToString(new UserInformationResponseDto(diseaseList, checklist, foods));
+    }
+
+    @Transactional
+    public List<MemberChecklist> getTodolist(Long memberId) {
+        Member member = findMemberById(memberId);
+        return member.getChecklistList();
     }
 
     @Transactional

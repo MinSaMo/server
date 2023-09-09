@@ -25,4 +25,13 @@ public class Checklist {
     @Column(name = "chk_deadline")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm")
     private LocalDateTime deadline;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "id:" + id +
+                ", description:'" + description + '\'' +
+                ", deadline:" + deadline +
+                '}';
+    }
 }

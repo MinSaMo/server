@@ -21,12 +21,15 @@ public class Member {
     @Column(name = "mb_name")
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member")
     private List<MemberDisease> diseaseList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member")
     private List<MemberChecklist> checklistList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member")
     private List<PreferredFood> foodList = new ArrayList<>();
 

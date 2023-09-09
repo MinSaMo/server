@@ -4,8 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.konkuk.gp.core.gpt.dto.DialogResponseDto;
 import com.konkuk.gp.core.gpt.dto.IntenseResponseDto;
+import com.konkuk.gp.core.gpt.dto.TodoListResponseDto;
 import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
 import com.konkuk.gp.core.gpt.enums.ChatType;
+import com.konkuk.gp.domain.dao.Checklist;
+import com.konkuk.gp.domain.dao.member.Member;
+import com.konkuk.gp.domain.dao.member.MemberChecklist;
 import com.konkuk.gp.service.MemberService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import io.github.flashvayne.chatgpt.property.ChatgptProperties;
@@ -17,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,10 +40,6 @@ public class GptService {
     private final String SYSTEM_INTENSE = "intense";
     private final String SYSTEM_GLOBAL = "global";
 
-    public String simpleChat(String msg) {
-        return chatgptService.sendMessage(msg);
-    }
-
     @Value("${gpt.system.intense}")
     private String intenseSystemScript;
     @Value("${gpt.system.global}")
@@ -47,11 +48,11 @@ public class GptService {
     private String dailyPromptTemplate;
     @Value("${gpt.system.information}")
     private String infoSystemScript;
+    @Value("${gpt.system.check-todolist}")
+    private String checkTodoListSystemScript;
 
     @Setter
     private String userInformation;
-    @Setter
-    private String previousConversation;
     @Setter
     private String message;
 
@@ -85,7 +86,7 @@ public class GptService {
         Map<String, String> params = new HashMap<>();
 
         params.put(message, script);
-        String information = memberService.getInformation(memberId);
+        String information = memberService.getInformationString(memberId);
         params.put(userInformation, information);
 
         String prompt = setPromptParams(dailyPromptTemplate, params);
@@ -136,6 +137,54 @@ public class GptService {
         try {
             UserInformationResponseDto res = objectMapper.readValue(response, UserInformationResponseDto.class);
             return res;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void checkCompletedTodolist(String caption, Long memberId) {
+
+        MultiChatProperties multi = chatgptProperties.getMulti();
+
+        double originalTopP = multi.getTopP();
+        double originalTemperature = multi.getTemperature();
+
+        multi.setTopP(0.3);
+        multi.setTemperature(0.1);
+
+        Member member = memberService.findMemberById(memberId);
+
+        List<MultiChatMessage> messages = new ArrayList<>();
+        messages.add(new MultiChatMessage("system", checkTodoListSystemScript));
+
+        List<Checklist> list = member.getChecklistList()
+                .stream().map(MemberChecklist::getChecklist).toList();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("input : ")
+                .append(caption)
+                .append(",")
+                .append("checklist : [");
+
+        for (Checklist checklist : list) {
+            sb.append(checklist.toString()).append(",");
+        }
+        sb.append("]");
+
+        String prompt = sb.toString();
+        messages.add(new MultiChatMessage("user", prompt));
+
+        String response = chatgptService.multiChat(messages);
+        List<Long> completeList = null;
+
+        multi.setTopP(originalTopP);
+        multi.setTemperature(originalTemperature);
+        try {
+            completeList = objectMapper.readValue(response, TodoListResponseDto.class).complete();
+            for (Long checklistId : completeList) {
+                memberService.completeChecklist(checklistId, memberId);
+            }
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
