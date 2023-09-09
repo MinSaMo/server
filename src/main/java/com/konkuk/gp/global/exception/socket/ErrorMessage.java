@@ -1,4 +1,4 @@
-package com.konkuk.gp.global.exception;
+package com.konkuk.gp.global.exception.socket;
 
 public enum ErrorMessage {
     SOCKET_ALREADY_USED("Socket Already Used"),

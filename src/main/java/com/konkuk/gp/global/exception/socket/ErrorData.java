@@ -1,4 +1,4 @@
-package com.konkuk.gp.global.exception;
+package com.konkuk.gp.global.exception.socket;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
