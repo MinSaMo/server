@@ -37,6 +37,14 @@ public class ClientSocketHandler extends TextMessageHandler {
         this.dialogManager = dialogManager;
     }
 
+    public void sendAdminMessage(WebSocketSession session, Message<String> message) {
+        try {
+            session.sendMessage(new TextMessage(Utils.getString(message)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 
