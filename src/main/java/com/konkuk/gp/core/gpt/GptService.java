@@ -2,10 +2,7 @@ package com.konkuk.gp.core.gpt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.konkuk.gp.core.gpt.dto.DialogResponseDto;
-import com.konkuk.gp.core.gpt.dto.IntenseResponseDto;
-import com.konkuk.gp.core.gpt.dto.TodoListResponseDto;
-import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
+import com.konkuk.gp.core.gpt.dto.*;
 import com.konkuk.gp.core.gpt.enums.ChatType;
 import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.member.Member;
@@ -50,6 +47,8 @@ public class GptService {
     private String infoSystemScript;
     @Value("${gpt.system.check-todolist}")
     private String checkTodoListSystemScript;
+    @Value("${gpt.system.check-emergency}")
+    private String checkEmergencySystemScript;
 
     @Setter
     private String userInformation;
@@ -70,8 +69,11 @@ public class GptService {
 
     public ChatType determineIntense(String script) {
         MultiChatMessage systemDefinition = getSystemDefinition(SYSTEM_INTENSE);
+        log.info("[INTENSE] System script : {}", systemDefinition);
         List<MultiChatMessage> messages = Arrays.asList(systemDefinition, new MultiChatMessage("user", script));
+        log.info("[INTENSE] Prompt : {}", script);
         String response = chatgptService.multiChat(messages);
+        log.info("[INTENSE] Response : {}",response);
         try {
             IntenseResponseDto result = objectMapper.readValue(response, IntenseResponseDto.class);
             return ChatType.of(result.answerTypeIndex());
@@ -185,6 +187,38 @@ public class GptService {
             for (Long checklistId : completeList) {
                 memberService.completeChecklist(checklistId, memberId);
             }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public EmergencyCheckDto checkEmergency(String caption) {
+        MultiChatProperties multi = chatgptProperties.getMulti();
+
+        double originalTopP = multi.getTopP();
+        double originalTemperature = multi.getTemperature();
+
+        multi.setTopP(0.3);
+        multi.setTemperature(0.1);
+
+        List<MultiChatMessage> messages = new ArrayList<>();
+        messages.add(new MultiChatMessage("system", checkEmergencySystemScript));
+        String prompt = "\"input\" :\"" +
+                caption
+                + "\"";
+        messages.add(new MultiChatMessage("user", prompt));
+
+        log.info("[EMERGENCY] System Script : {}", checkTodoListSystemScript);
+        log.info("[EMERGENCY] Prompt : {}", prompt);
+        String response = chatgptService.multiChat(messages);
+        log.info("[EMERGENCY] Result : {}", response);
+        multi.setTopP(originalTopP);
+        multi.setTemperature(originalTemperature);
+
+        try {
+            EmergencyCheckDto result = objectMapper.readValue(response, EmergencyCheckDto.class);
+            return result;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

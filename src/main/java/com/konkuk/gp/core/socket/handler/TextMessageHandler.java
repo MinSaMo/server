@@ -28,7 +28,7 @@ public class TextMessageHandler extends TextWebSocketHandler {
         }
     }
 
-    protected <T> void sendMessage(WebSocketSession session, Message<T> message) {
+    public <T> void sendMessage(WebSocketSession session, Message<T> message) {
         try {
             session.sendMessage(new TextMessage(Utils.getString(message)));
         } catch (Exception e) {
