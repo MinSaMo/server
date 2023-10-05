@@ -6,4 +6,5 @@ import lombok.*;
 public class ClientRequestDto {
     private String script;
     private Long dialogId;
+    private Boolean isReal;
 }

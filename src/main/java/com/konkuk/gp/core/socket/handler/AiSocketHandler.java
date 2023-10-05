@@ -1,7 +1,7 @@
 package com.konkuk.gp.core.socket.handler;
 
 import com.konkuk.gp.core.gpt.GptService;
-import com.konkuk.gp.core.gpt.dto.EmergencyCheckDto;
+import com.konkuk.gp.domain.dto.response.EmergencyCheckDto;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.dto.ai.AiRequestDto;
 import com.konkuk.gp.core.socket.DialogManager;

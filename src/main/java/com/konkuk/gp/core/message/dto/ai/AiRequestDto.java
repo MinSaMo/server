@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class AiRequestDto {
     private String caption;
+    private Boolean isReal;
 }

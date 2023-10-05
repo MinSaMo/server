@@ -1,7 +1,7 @@
 package com.konkuk.gp.core.socket.handler;
 
 import com.konkuk.gp.core.gpt.GptService;
-import com.konkuk.gp.core.gpt.dto.DialogResponseDto;
+import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.core.gpt.enums.ChatType;
 import com.konkuk.gp.core.message.Message;
 import com.konkuk.gp.core.message.MessageManager;
@@ -73,6 +73,15 @@ public class ClientSocketHandler extends TextMessageHandler {
         ClientRequestDto data = (ClientRequestDto) message.getData();
         log.info("[CLIENT] Received script : {}", data.getScript());
         log.info("[CLIENT] Received dialogId : {}", data.getDialogId());
+
+        if (!data.getIsReal()) {
+            List<MultiChatMessage> chat = new ArrayList<>();
+            chat.add(new MultiChatMessage("user", data.getScript()));
+            dialogManager.addMessage(chat);
+            dialogManager.saveDialogHistory();
+            dialogManager.sendUserInfo();
+            return;
+        }
 
         ChatType chatType = chatGptService.determineIntense(data.getScript());
         List<MultiChatMessage> currentHistory = dialogManager.getCurrentHistory();
