@@ -1,9 +1,12 @@
 package com.konkuk.gp.core.socket;
 
 import com.konkuk.gp.core.gpt.GptService;
-import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
+import com.konkuk.gp.core.socket.handler.dashboard.ChatLoggerHandler;
+import com.konkuk.gp.core.socket.handler.dashboard.UserInformationHandler;
 import com.konkuk.gp.domain.dao.dialog.DialogHistory;
 import com.konkuk.gp.domain.dao.dialog.DialogHistoryRepository;
+import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
+import com.konkuk.gp.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.gp.service.MemberService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.Getter;
@@ -24,6 +27,9 @@ public class DialogManager {
     private final GptService gptService;
     private final DialogHistoryRepository dialogHistoryRepository;
 
+    private final ChatLoggerHandler chatLoggerHandler;
+    private final UserInformationHandler userInformationHandler;
+
     private boolean isRun;
     @Getter
     private Long dialogId;
@@ -35,10 +41,10 @@ public class DialogManager {
     private Long sequence;
 
     @PostConstruct
-    protected void init() {
+    public void init() {
         isRun = false;
         dialogId = 0L;
-        memberId = null;
+        memberId = 1L;
         sequence = 1L;
     }
 
@@ -67,7 +73,14 @@ public class DialogManager {
     public int addMessage(List<MultiChatMessage> chatMessages) {
         if (!isRun) return -1;
         this.currentHistory.addAll(chatMessages);
+        chatLoggerHandler.sendLog(currentHistory);
         return Math.toIntExact(sequence++);
+    }
+    public int addMessage(MultiChatMessage chatMessages) {
+        if (!isRun) return -1;
+        this.currentHistory.add(chatMessages);
+        chatLoggerHandler.sendLog(currentHistory);
+        return Math.toIntExact(sequence);
     }
 
     /**
@@ -86,8 +99,13 @@ public class DialogManager {
      */
     @Transactional
     public void generateUserInformation() {
-        UserInformationResponseDto information = gptService.generateUserInformation(currentHistory);
+        UserInformationGenerateDto information = gptService.generateUserInformation(currentHistory);
         memberService.saveInformation(information, memberId);
+    }
+
+    public void sendUserInfo() {
+        UserInformationResponseDto info = memberService.getInformation(memberId);
+        userInformationHandler.sendInfo(info);
     }
 
     private Long generateDialogId() {

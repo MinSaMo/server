@@ -2,11 +2,12 @@ package com.konkuk.gp.core.gpt;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.konkuk.gp.core.gpt.dto.*;
 import com.konkuk.gp.core.gpt.enums.ChatType;
 import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.member.Member;
 import com.konkuk.gp.domain.dao.member.MemberChecklist;
+import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
+import com.konkuk.gp.domain.dto.response.*;
 import com.konkuk.gp.service.MemberService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import io.github.flashvayne.chatgpt.property.ChatgptProperties;
@@ -114,7 +115,7 @@ public class GptService {
         return res;
     }
 
-    public UserInformationResponseDto generateUserInformation(List<MultiChatMessage> dialog) {
+    public UserInformationGenerateDto generateUserInformation(List<MultiChatMessage> dialog) {
 
         MultiChatProperties multi = chatgptProperties.getMulti();
 
@@ -137,7 +138,7 @@ public class GptService {
         multi.setTopP(originalTopP);
         multi.setTemperature(originalTemperature);
         try {
-            UserInformationResponseDto res = objectMapper.readValue(response, UserInformationResponseDto.class);
+            UserInformationGenerateDto res = objectMapper.readValue(response, UserInformationGenerateDto.class);
             return res;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

@@ -1,6 +1,8 @@
 package com.konkuk.gp.service;
 
-import com.konkuk.gp.core.gpt.dto.UserInformationResponseDto;
+import com.konkuk.gp.core.socket.handler.dashboard.UserInformationHandler;
+import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
+import com.konkuk.gp.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.Disease;
 import com.konkuk.gp.domain.dao.member.*;
@@ -23,8 +25,10 @@ public class MemberService {
     private final ChecklistService checklistService;
     private final PreferredFoodRepository preferredFoodRepository;
 
+    private final UserInformationHandler userInformationHandler;
+
     @Transactional
-    public void saveInformation(UserInformationResponseDto dto, Long memberId) {
+    public void saveInformation(UserInformationGenerateDto dto, Long memberId) {
 
         List<String> diseases = dto.diseases();
         List<String> preferredFoods = dto.preferredFoods();
@@ -86,24 +90,26 @@ public class MemberService {
 
     @Transactional
     public String getInformationString(Long memberId) {
+        UserInformationResponseDto information = getInformation(memberId);
+        return informationToString(information);
+    }
+
+    @Transactional
+    public UserInformationResponseDto getInformation(Long memberId) {
         Member member = findMemberById(memberId);
 
         List<String> diseaseList = member.getDiseaseList().stream()
                 .map(ds -> ds.getDisease().getName())
                 .toList();
 
-        List<ChecklistCreateDto> checklist = member.getChecklistList().stream()
-                .map(cl -> {
-                    Checklist ck = cl.getChecklist();
-                    return new ChecklistCreateDto(ck.getDescription(), ck.getDeadline());
-                })
+        List<Checklist> checklist = member.getChecklistList().stream()
+                .map(MemberChecklist::getChecklist)
                 .toList();
 
         List<String> foods = member.getFoodList().stream()
                 .map(fd -> fd.getName())
                 .toList();
-
-        return informationToString(new UserInformationResponseDto(diseaseList, checklist, foods));
+        return new UserInformationResponseDto(diseaseList, checklist, foods);
     }
 
     @Transactional
@@ -128,10 +134,10 @@ public class MemberService {
         sb.append("],");
 
         sb.append("user's todolist : [");
-        for (ChecklistCreateDto chk : dto.todoList()) {
+        for (Checklist chk : dto.todoList()) {
             sb.append("{");
-            sb.append("\"description:\"" + chk.description() + ",");
-            sb.append("\"deadline:\"" + chk.deadline().toString() + ",");
+            sb.append("\"description:\"" + chk.getDescription() + ",");
+            sb.append("\"deadline:\"" + chk.getDeadline().toString() + ",");
             sb.append("},");
         }
         sb.append("],");

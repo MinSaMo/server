@@ -26,6 +26,10 @@ public class Checklist {
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm")
     private LocalDateTime deadline;
 
+    @Builder.Default
+    @Column(name = "chk_is_complete")
+    private Boolean isComplete = false;
+
     @Override
     public String toString() {
         return "{" +
