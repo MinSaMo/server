@@ -34,7 +34,7 @@ public class AdminController {
         WebSocketSession session = sessionRegistry.getSession(SessionType.CLIENT)
                 .orElseThrow(() -> NotFoundException.CLIENT_SESSION_NOT_EXIST);
         // 채팅 로그 찍어주기
-        clientSocketHandler.sendAdminMessage(session, Message.of(dto.script()));
+        clientSocketHandler.sendAdminMessage(session, Message.of(dto.script(), Message.STATUS_OK));
         dialogManager.addMessage(new MultiChatMessage("assistant", dto.script()));
         dialogManager.saveDialogHistory();
         return "OK";
@@ -48,6 +48,7 @@ public class AdminController {
         dialogManager.addMessage(new MultiChatMessage("user", dto.script()));
         return "OK";
     }
+
     @PostMapping("/caption")
     public String sendCaption(@RequestBody CaptionDto dto) {
         captionLoggerHandler.addCaption(dto.caption());

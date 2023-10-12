@@ -1,18 +1,20 @@
 package com.konkuk.gp.core.socket.handler;
 
 import com.konkuk.gp.core.gpt.GptService;
-import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.core.gpt.enums.ChatType;
 import com.konkuk.gp.core.message.Message;
-import com.konkuk.gp.core.message.MessageManager;
+import com.konkuk.gp.core.message.MessageUtils;
 import com.konkuk.gp.core.message.dto.client.ClientRequestDto;
 import com.konkuk.gp.core.message.dto.client.ClientResponseDto;
 import com.konkuk.gp.core.message.dto.client.TriggerType;
 import com.konkuk.gp.core.socket.DialogManager;
 import com.konkuk.gp.core.socket.SessionRegistry;
 import com.konkuk.gp.core.socket.SessionType;
+import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.global.Utils;
-import com.konkuk.gp.global.exception.socket.ErrorMessage;
+import com.konkuk.gp.global.exception.socket.ErrorCode;
+import com.konkuk.gp.global.utils.convert.ClientMessageConverter;
+import com.konkuk.gp.global.utils.valid.MessageValidator;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,56 +32,51 @@ import java.util.List;
 public class ClientSocketHandler extends TextMessageHandler {
 
     private final DialogManager dialogManager;
+    private final ClientMessageConverter converter;
 
     @Autowired
-    public ClientSocketHandler(SessionRegistry registry, GptService chatGptService, DialogManager dialogManager) {
-        super(registry, SessionType.CLIENT, chatGptService);
+    public ClientSocketHandler(
+            SessionRegistry registry,
+            GptService chatGptService,
+            DialogManager dialogManager,
+            MessageValidator messageValidator,
+            ClientMessageConverter converter) {
+        super(registry, SessionType.CLIENT, chatGptService, messageValidator);
         this.dialogManager = dialogManager;
+        this.converter = converter;
     }
 
-    public void sendAdminMessage(WebSocketSession session, Message<String> message) {
-        try {
-            session.sendMessage(new TextMessage(Utils.getString(message)));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
+    /**
+     * @param session     Client Session
+     * @param textMessage Client Message
+     */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 
         Long memberId = dialogManager.getMemberId();
-        Message message = null;
+        Long dialogId = startDialog();
 
-        Long dialogId;
-        if (!dialogManager.hasDialog()) {
-            dialogId = dialogManager.startDialog();
-        } else {
-            dialogId = dialogManager.getDialogId();
-        }
-
+        Message<ClientRequestDto> message;
         try {
-            message = Utils.getObject(textMessage.getPayload(), ClientRequestDto.class);
-        } catch (Exception e) {
-            sendError(session, ErrorMessage.INVALID_MESSAGE_FORMAT);
+            message = convertToClientMessage(textMessage);
+        } catch (IllegalArgumentException e) {
+            sendError(session, e.getMessage(),ErrorCode.INVALID_MESSAGE);
+            log.error("[CLIENT] Conversion error : {}", e.getMessage());
+            return;
+        } catch (ClassCastException e) {
+            sendError(session, e.getMessage(), ErrorCode.INVALID_MESSAGE);
+            log.error("[CLIENT] Validation error : {}", e.getMessage());
             return;
         }
 
-        if (!message.getSender().equals(Message.SENDER_CLIENT)) {
-            sendError(session, ErrorMessage.INVALID_MESSAGE_FORMAT);
-            return;
-        }
-
-        ClientRequestDto data = (ClientRequestDto) message.getData();
+        ClientRequestDto data = message.getData();
         log.info("[CLIENT] Received script : {}", data.getScript());
         log.info("[CLIENT] Received dialogId : {}", data.getDialogId());
 
+
         if (!data.getIsReal()) {
-            List<MultiChatMessage> chat = new ArrayList<>();
-            chat.add(new MultiChatMessage("user", data.getScript()));
-            dialogManager.addMessage(chat);
-            dialogManager.saveDialogHistory();
-            dialogManager.sendUserInfo();
+            adminProcess(data);
             return;
         }
 
@@ -90,7 +87,7 @@ public class ClientSocketHandler extends TextMessageHandler {
         List<MultiChatMessage> chat = new ArrayList<>();
         chat.add(new MultiChatMessage("user", data.getScript()));
 
-        Message<ClientResponseDto> responseData = MessageManager.response(
+        Message<ClientResponseDto> responseData = MessageUtils.response(
                 ClientResponseDto.builder()
                         .dialogId(dialogId)
                         .script(res.response())
@@ -104,5 +101,40 @@ public class ClientSocketHandler extends TextMessageHandler {
         dialogManager.addMessage(chat);
         dialogManager.saveDialogHistory();
         dialogManager.generateUserInformation();
+    }
+
+    private void adminProcess(ClientRequestDto data) {
+        List<MultiChatMessage> chat = new ArrayList<>();
+        chat.add(new MultiChatMessage("user", data.getScript()));
+        dialogManager.addMessage(chat);
+        dialogManager.saveDialogHistory();
+        dialogManager.sendUserInfo();
+    }
+
+    public Message<ClientRequestDto> convertToClientMessage(TextMessage textMessage) {
+        Message<ClientRequestDto> message = converter.convert(textMessage);
+        messageValidator.validate(message);
+        return message;
+    }
+
+    private Long startDialog() {
+        Long dialogId;
+        if (!dialogManager.hasDialog()) {
+            dialogId = dialogManager.startDialog();
+        } else {
+            dialogId = dialogManager.getDialogId();
+        }
+        return dialogId;
+    }
+
+    /**
+     * Admin API 를 위해 필요한 함수
+     */
+    public void sendAdminMessage(WebSocketSession session, Message<String> message) {
+        try {
+            session.sendMessage(new TextMessage(Utils.getString(message)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

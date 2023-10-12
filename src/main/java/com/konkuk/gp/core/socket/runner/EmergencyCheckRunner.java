@@ -27,7 +27,7 @@ public class EmergencyCheckRunner implements Runnable {
         Timer timer = new Timer();
         WebSocketSession session = sessionRegistry.getSession(SessionType.CLIENT)
                 .orElseThrow(() -> new RuntimeException("Session not found : client"));
-        handler.sendMessage(session, Message.of("Please Check Emergency in " + tiemOut + "ms"));
+        handler.sendMessage(session, Message.of("Please Check Emergency in " + tiemOut + "ms", Message.STATUS_OK));
         timer.schedule(sendEmergencyAlarm(session), tiemOut);
     }
 
@@ -35,7 +35,7 @@ public class EmergencyCheckRunner implements Runnable {
         return new TimerTask() {
             @Override
             public void run() {
-                handler.sendMessage(session, Message.of("Emergency Occur"));
+                handler.sendMessage(session, Message.of("Emergency Occur", Message.STATUS_OK));
             }
         };
     }
