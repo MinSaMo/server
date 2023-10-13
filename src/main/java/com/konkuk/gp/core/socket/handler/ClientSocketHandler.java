@@ -48,6 +48,7 @@ public class ClientSocketHandler extends TextMessageHandler {
 
 
     /**
+     * Decorator
      * @param session     Client Session
      * @param textMessage Client Message
      */
@@ -55,13 +56,13 @@ public class ClientSocketHandler extends TextMessageHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage textMessage) {
 
         Long memberId = dialogManager.getMemberId();
-        Long dialogId = startDialog();
+        Long dialogId = dialogManager.startDialog();
 
         Message<ClientRequestDto> message;
         try {
             message = convertToClientMessage(textMessage);
         } catch (IllegalArgumentException e) {
-            sendError(session, e.getMessage(),ErrorCode.INVALID_MESSAGE);
+            sendError(session, e.getMessage(), ErrorCode.INVALID_MESSAGE);
             log.error("[CLIENT] Conversion error : {}", e.getMessage());
             return;
         } catch (ClassCastException e) {
@@ -73,7 +74,6 @@ public class ClientSocketHandler extends TextMessageHandler {
         ClientRequestDto data = message.getData();
         log.info("[CLIENT] Received script : {}", data.getScript());
         log.info("[CLIENT] Received dialogId : {}", data.getDialogId());
-
 
         if (!data.getIsReal()) {
             adminProcess(data);
@@ -99,8 +99,6 @@ public class ClientSocketHandler extends TextMessageHandler {
 
         chat.add(new MultiChatMessage("assistant", res.response()));
         dialogManager.addMessage(chat);
-        dialogManager.saveDialogHistory();
-        dialogManager.generateUserInformation();
     }
 
     private void adminProcess(ClientRequestDto data) {
@@ -115,16 +113,6 @@ public class ClientSocketHandler extends TextMessageHandler {
         Message<ClientRequestDto> message = converter.convert(textMessage);
         messageValidator.validate(message);
         return message;
-    }
-
-    private Long startDialog() {
-        Long dialogId;
-        if (!dialogManager.hasDialog()) {
-            dialogId = dialogManager.startDialog();
-        } else {
-            dialogId = dialogManager.getDialogId();
-        }
-        return dialogId;
     }
 
     /**

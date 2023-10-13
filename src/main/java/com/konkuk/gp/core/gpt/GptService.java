@@ -7,7 +7,10 @@ import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.member.Member;
 import com.konkuk.gp.domain.dao.member.MemberChecklist;
 import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
-import com.konkuk.gp.domain.dto.response.*;
+import com.konkuk.gp.domain.dto.response.DialogResponseDto;
+import com.konkuk.gp.domain.dto.response.EmergencyCheckDto;
+import com.konkuk.gp.domain.dto.response.IntenseResponseDto;
+import com.konkuk.gp.domain.dto.response.TodoListResponseDto;
 import com.konkuk.gp.service.MemberService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import io.github.flashvayne.chatgpt.property.ChatgptProperties;
@@ -74,7 +77,7 @@ public class GptService {
         List<MultiChatMessage> messages = Arrays.asList(systemDefinition, new MultiChatMessage("user", script));
         log.info("[INTENSE] Prompt : {}", script);
         String response = chatgptService.multiChat(messages);
-        log.info("[INTENSE] Response : {}",response);
+        log.info("[INTENSE] Response : {}", response);
         try {
             IntenseResponseDto result = objectMapper.readValue(response, IntenseResponseDto.class);
             return ChatType.of(result.answerTypeIndex());

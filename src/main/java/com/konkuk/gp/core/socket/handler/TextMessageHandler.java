@@ -23,13 +23,15 @@ public class TextMessageHandler extends TextWebSocketHandler {
     protected final SessionType sessionType;
     protected final GptService chatGptService;
     protected final MessageValidator messageValidator;
-     protected void sendError(WebSocketSession session, ErrorMessage errMsg) {
+
+    protected void sendError(WebSocketSession session, ErrorMessage errMsg) {
         try {
             session.sendMessage(new TextMessage(Utils.getString(MessageUtils.error(errMsg))));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
 
     protected void sendError(WebSocketSession session, String message, ErrorCode code) {
         try {
