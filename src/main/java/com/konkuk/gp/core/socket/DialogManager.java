@@ -1,6 +1,7 @@
 package com.konkuk.gp.core.socket;
 
 import com.konkuk.gp.core.gpt.GptService;
+import com.konkuk.gp.core.socket.aop.TimerStart;
 import com.konkuk.gp.core.socket.handler.dashboard.ChatLoggerHandler;
 import com.konkuk.gp.core.socket.handler.dashboard.UserInformationHandler;
 import com.konkuk.gp.domain.dao.dialog.DialogHistory;
@@ -12,6 +13,7 @@ import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class DialogManager {
 
     private final MemberService memberService;
@@ -48,7 +51,9 @@ public class DialogManager {
         sequence = 1L;
     }
 
+    @TimerStart
     public Long startDialog() {
+        if (hasDialog()) return dialogId;
         if (isRun || memberId == null) {
             throw new RuntimeException("INVALID STATE : start dialog");
         }
@@ -64,6 +69,8 @@ public class DialogManager {
         }
         isRun = false;
         saveDialogHistory();
+        generateUserInformation();
+        log.info("[DIALOG] END DIALOG");
     }
 
     public boolean hasDialog() {
@@ -76,6 +83,7 @@ public class DialogManager {
         chatLoggerHandler.sendLog(currentHistory);
         return Math.toIntExact(sequence++);
     }
+
     public int addMessage(MultiChatMessage chatMessages) {
         if (!isRun) return -1;
         this.currentHistory.add(chatMessages);
