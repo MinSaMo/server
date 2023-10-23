@@ -1,6 +1,5 @@
 package com.konkuk.gp.service;
 
-import com.konkuk.gp.core.socket.handler.dashboard.UserInformationHandler;
 import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.gp.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.gp.domain.dao.Checklist;
@@ -24,8 +23,6 @@ public class MemberService {
     private final DiseaseService diseaseService;
     private final ChecklistService checklistService;
     private final PreferredFoodRepository preferredFoodRepository;
-
-    private final UserInformationHandler userInformationHandler;
 
     @Transactional
     public void saveInformation(UserInformationGenerateDto dto, Long memberId) {

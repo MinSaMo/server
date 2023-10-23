@@ -1,6 +1,6 @@
 package com.konkuk.gp.config;
 
-import com.konkuk.gp.core.socket.DialogManager;
+import com.konkuk.gp.service.dialog.DialogManager;
 import com.konkuk.gp.domain.dao.member.Member;
 import com.konkuk.gp.domain.dao.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
