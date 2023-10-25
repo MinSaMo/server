@@ -1,4 +1,4 @@
-package com.konkuk.gp.global.thread;
+package com.konkuk.gp.service;
 
 import com.konkuk.gp.service.dialog.TimerEnd;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.TimerTask;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DialogTimer {
+public class DialogTimerService {
 
     private final int timeOut = 10 * 1000;
     private Timer timer = null;

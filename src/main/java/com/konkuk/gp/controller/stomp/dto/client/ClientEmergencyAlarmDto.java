@@ -9,7 +9,8 @@ public class ClientEmergencyAlarmDto extends ClientResponseDto {
                 ChatType.EMERGENCY.getName(),
                 false,
                 TriggerType.BY_EMERGENCY,
-                -1L
+                -1L,
+                0L
         );
     }
 

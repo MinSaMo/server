@@ -1,6 +1,6 @@
 package com.konkuk.gp.service.dialog;
 
-import com.konkuk.gp.global.thread.DialogTimer;
+import com.konkuk.gp.service.DialogTimerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DialogTimerAdvisor {
 
-    private final DialogTimer timer;
+    private final DialogTimerService timer;
     private final DialogManager manager;
 
     @After("@annotation(com.konkuk.gp.service.dialog.TimerStart)")
