@@ -29,13 +29,17 @@ public class DashboardLogger {
     }
 
     public void sendIntenseLog(ChatType intense) {
-        logProperty.setIntense(intense);
-        template.convertAndSend(LogType.INTENSE.getPath(), logProperty.getIntenseLogMessage());
+        if (logProperty != null) {
+            logProperty.setIntense(intense);
+            template.convertAndSend(LogType.INTENSE.getPath(), logProperty.getIntenseLogMessage());
+        }
     }
 
     public void sendPromptLog(String prompt) {
-        logProperty.setPrompt(prompt);
-        template.convertAndSend(LogType.PROMPT.getPath(), logProperty.getPromptLogMessage());
+        if (logProperty != null) {
+            logProperty.setPrompt(prompt);
+            template.convertAndSend(LogType.PROMPT.getPath(), logProperty.getPromptLogMessage());
+        }
     }
 
     public void sendReplyLog(String reply) {

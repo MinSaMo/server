@@ -25,7 +25,6 @@ public class LogProperty implements LoggingFacade {
     private double responseTime;
 
     @Override
-
     public Map<String, String> getIntenseLogMessage() {
         Map<String, String> res = this.base();
         res.put("script", script);

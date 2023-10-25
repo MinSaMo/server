@@ -8,6 +8,7 @@ public enum LogType {
     INTENSE("/sub/intense"),
     PROMPT("/sub/prompt"),
     REPLY("/sub/reply"),
+    EMERGENCY("/sub/emergency")
     ;
 
     private final String path;

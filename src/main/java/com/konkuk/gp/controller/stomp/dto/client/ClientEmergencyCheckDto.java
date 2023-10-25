@@ -1,21 +1,22 @@
 package com.konkuk.gp.controller.stomp.dto.client;
 
-import com.konkuk.gp.service.enums.ChatType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public class ClientEmergencyCheckDto extends ClientResponseDto {
-    private ClientEmergencyCheckDto(String script) {
-        super(
-                script,
-                ChatType.EMERGENCY.getName(),
-                false,
-                TriggerType.BY_EMERGENCY,
-                -1L,
-                0L
-        );
+import java.time.LocalDateTime;
+
+@Getter
+@NoArgsConstructor
+public class ClientEmergencyCheckDto {
+    private String reason;
+    private int timeout;
+    private LocalDateTime timestamp;
+
+    @Builder
+    public ClientEmergencyCheckDto(String reason, int timeout) {
+        this.reason = reason;
+        this.timeout = timeout;
+        timestamp = LocalDateTime.now();
     }
-
-    public static ClientEmergencyCheckDto of(String data) {
-        return new ClientEmergencyCheckDto(data);
-    }
-
 }
