@@ -7,8 +7,8 @@ import com.konkuk.gp.controller.stomp.dto.client.TriggerType;
 import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.domain.dto.response.EmergencyCheckDto;
 import com.konkuk.gp.global.logger.DashboardLogger;
-import com.konkuk.gp.global.message.Message;
 import com.konkuk.gp.global.thread.EmergencyCheckRunner;
+import com.konkuk.gp.global.thread.TodolistCheckRunner;
 import com.konkuk.gp.global.validation.MessageValid;
 import com.konkuk.gp.service.GptService;
 import com.konkuk.gp.service.dialog.DialogManager;
@@ -28,7 +28,8 @@ public class MessageController {
 
     private final GptService gptService;
     private final DialogManager dialogManager;
-    private final ObjectProvider<EmergencyCheckRunner> provider;
+    private final ObjectProvider<EmergencyCheckRunner> emergencyCheckerProvider;
+    private final ObjectProvider<TodolistCheckRunner> todolistCheckerProvider;
 
     private final DashboardLogger logger;
 
@@ -37,14 +38,13 @@ public class MessageController {
     @TimerStart
     @MessageValid
     public ClientResponseDto dialogWithScript(
-            Message<ClientRequestDto> dto
+            ClientRequestDto dto
     ) {
         long start = System.currentTimeMillis();
         Long memberId = dialogManager.getMemberId();
         Long dialogId = dialogManager.startDialog();
 
-        ClientRequestDto data = dto.getData();
-        String script = data.getScript();
+        String script = dto.getScript();
         logger.sendScriptLog(script, memberId, dialogId);
         ChatType chatType = gptService.determineIntense(script);
         logger.sendIntenseLog(chatType);
@@ -63,7 +63,6 @@ public class MessageController {
                 .triggerType(TriggerType.BY_USER)
                 .dialogId(dialogId)
                 .type(chatType.getName())
-                .isFinish(false)
                 .time(time)
                 .build();
     }
@@ -71,23 +70,51 @@ public class MessageController {
     @MessageValid
     @MessageMapping("/caption")
     @SendTo(value = "/sub/reply")
-    public Message<ClientResponseDto> dialogWithCaption(
-            Message<AiRequestDto> dto
+    public ClientResponseDto dialogWithCaption(
+            AiRequestDto dto
     ) {
+        long start = System.currentTimeMillis();
         Long memberId = dialogManager.getMemberId();
         Long dialogId = dialogManager.startDialog();
 
-        AiRequestDto data = dto.getData();
-        String caption = data.getCaption();
-        /**
-         * 1. 응급상황 판단
-         * 2. 대화가 필요한 상황인지 판단
-         */
+        String caption = dto.getCaption();
+
         EmergencyCheckDto emergencyResult = gptService.checkEmergency(caption);
         if (emergencyResult.isDetected()) {
-            // new Thread(provider.getObject()).start(); 수정
+            EmergencyCheckRunner emergencyChecker = getEmergencyChecker(caption);
+            startBackgroundJob(emergencyChecker);
+            return null;
         }
-        gptService.checkCompletedTodolist(caption, memberId);
-        return null;
+
+        TodolistCheckRunner todoChecker = getTodoChecker(caption, memberId);
+        startBackgroundJob(todoChecker);
+
+        // TODO : 말을 걸지 판단하는 Script 필요함
+        // 현재 구현은 ADVICE 로 내어줌
+        DialogResponseDto response = gptService.ask(caption, ChatType.ADVICE, memberId, dialogManager.getCurrentHistory());
+        long time = System.currentTimeMillis() - start;
+        return ClientResponseDto.builder()
+                .script(response.response())
+                .triggerType(TriggerType.BY_CAPTION)
+                .dialogId(-1L)
+                .type(ChatType.ADVICE.getName())
+                .time(time)
+                .build();
+    }
+
+    private void startBackgroundJob(Runnable runnable) {
+        new Thread(runnable).start();
+    }
+
+    private EmergencyCheckRunner getEmergencyChecker(String caption) {
+        EmergencyCheckRunner runner = emergencyCheckerProvider.getObject();
+        runner.setCaption(caption);
+        return runner;
+    }
+
+    private TodolistCheckRunner getTodoChecker(String caption, Long memberId) {
+        TodolistCheckRunner runner = todolistCheckerProvider.getObject();
+        runner.setParam(caption, memberId);
+        return runner;
     }
 }

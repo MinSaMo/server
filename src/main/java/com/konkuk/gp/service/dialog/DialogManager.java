@@ -45,7 +45,6 @@ public class DialogManager {
         sequence = 1L;
     }
 
-
     public Long startDialog() {
         if (hasDialog()) return dialogId;
         if (isRun || memberId == null) {
