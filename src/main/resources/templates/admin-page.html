@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title> Daila Adming Page </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/stomp.min.js"></script>
+    <script src="/js/admin.js"></script>
+    <!-- Boxicons CDN Link -->
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<section class="home-section">
+    <div class="home-content">
+        <div class="sales-boxes">
+            <div class="recent-sales box">
+                <div class="title">DAILA LOG PAGE</div>
+                <div class="sales-details">
+                    <ul class="details" id="timestamp_ul">
+                        <li class="topic">Timestamp</li>
+                    </ul>
+                    <ul class="details" id="script_ul">
+                        <li class="topic">Script</li>
+                    </ul>
+                    <ul class="details" id="intense_ul">
+                        <li class="topic">Intense</li>
+                    </ul>
+                    <ul class="details" id="prompt_ul">
+                        <li class="topic">Prompt</li>
+                    </ul>
+                    <ul class="details" id="reply_ul">
+                        <li class="topic">Reply</li>
+                    </ul>
+                    <ul class="details" id="response_time_ul">
+                        <li class="topic">Response time</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input-container"
+         style="
+         position: fixed;
+         bottom: 30px;
+         width: 100%;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+    ">
+        <label for="user_input"
+               style="
+               margin-right: 5px;
+        ">
+            Type Here
+        </label>
+        <input onkeyup="if(window.event.keyCode==13){onClick()}" id="user_input" type="text" style="width: 30%;">
+        <button onclick="onClick()" type="submit" id="send_btn">SEND</button>
+    </div>
+</section>
+</body>
+</html>

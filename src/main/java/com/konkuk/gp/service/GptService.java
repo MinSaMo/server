@@ -2,6 +2,7 @@ package com.konkuk.gp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.konkuk.gp.global.logger.DashboardLogger;
 import com.konkuk.gp.service.enums.ChatType;
 import com.konkuk.gp.domain.dao.Checklist;
 import com.konkuk.gp.domain.dao.member.Member;
@@ -36,6 +37,8 @@ public class GptService {
     private final ObjectMapper objectMapper;
     private final MemberService memberService;
     private final ChatgptProperties chatgptProperties;
+
+    private final DashboardLogger logger;
 
     private final String SYSTEM_INTENSE = "intense";
     private final String SYSTEM_GLOBAL = "global";
@@ -100,6 +103,7 @@ public class GptService {
         messages.add(systemDefinition);
         messages.addAll(currentDialog);
         messages.add(new MultiChatMessage("user", prompt));
+        logger.sendPromptLog(prompt);
 
         String response = chatgptService.multiChat(messages);
         try {
@@ -219,8 +223,7 @@ public class GptService {
         multi.setTemperature(originalTemperature);
 
         try {
-            EmergencyCheckDto result = objectMapper.readValue(response, EmergencyCheckDto.class);
-            return result;
+            return objectMapper.readValue(response, EmergencyCheckDto.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
