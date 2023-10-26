@@ -34,7 +34,7 @@ public class MessageController {
     private final DashboardLogger logger;
 
     @MessageMapping("/script")
-    @SendTo("/sub/reply")
+    @SendTo("/topic/service/reply")
     @TimerStart
     @MessageValid
     public ClientResponseDto dialogWithScript(
@@ -58,6 +58,7 @@ public class MessageController {
 
         long time = System.currentTimeMillis() - start;
         dialogManager.addMessage(script, reply.response());
+        logger.sendReplyLog(reply.response());
         return ClientResponseDto.builder()
                 .script(reply.response())
                 .triggerType(TriggerType.BY_USER)
@@ -69,7 +70,7 @@ public class MessageController {
 
     @MessageValid
     @MessageMapping("/caption")
-    @SendTo(value = "/sub/reply")
+    @SendTo(value = "/topic/service/reply")
     public ClientResponseDto dialogWithCaption(
             AiRequestDto dto
     ) {
@@ -78,6 +79,7 @@ public class MessageController {
         Long dialogId = dialogManager.startDialog();
 
         String caption = dto.getCaption();
+        logger.sendCaptionLog(caption, memberId);
 
         EmergencyCheckDto emergencyResult = gptService.checkEmergency(caption);
         if (emergencyResult.isDetected()) {
@@ -93,6 +95,7 @@ public class MessageController {
         // 현재 구현은 ADVICE 로 내어줌
         DialogResponseDto response = gptService.ask(caption, ChatType.ADVICE, memberId, dialogManager.getCurrentHistory());
         long time = System.currentTimeMillis() - start;
+        logger.sendCaptionReplyLog(response.response());
         return ClientResponseDto.builder()
                 .script(response.response())
                 .triggerType(TriggerType.BY_CAPTION)

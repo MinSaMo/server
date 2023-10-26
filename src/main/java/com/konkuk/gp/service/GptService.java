@@ -151,7 +151,7 @@ public class GptService {
     }
 
     @Transactional
-    public void checkCompletedTodolist(String caption, Long memberId) {
+    public List<String> checkCompletedTodolist(String caption, Long memberId) {
 
         MultiChatProperties multi = chatgptProperties.getMulti();
 
@@ -188,11 +188,15 @@ public class GptService {
 
         multi.setTopP(originalTopP);
         multi.setTemperature(originalTemperature);
+
+        List<String> res = new ArrayList<>();
         try {
             completeList = objectMapper.readValue(response, TodoListResponseDto.class).complete();
             for (Long checklistId : completeList) {
-                memberService.completeChecklist(checklistId, memberId);
+                String checklistName = memberService.completeChecklist(checklistId, memberId);
+                res.add(checklistName);
             }
+            return res;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

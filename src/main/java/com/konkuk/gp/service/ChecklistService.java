@@ -21,13 +21,14 @@ public class ChecklistService {
     private final MemberChecklistRepository memberChecklistRepository;
 
     @Transactional
-    public void completeChecklist(Long checklistId, Member member) {
+    public String completeChecklist(Long checklistId, Member member) {
         MemberChecklist checklist = member.getChecklistList().stream()
                 .filter(mc -> mc.getChecklist().getId().equals(checklistId))
                 .findFirst()
                 .orElseThrow(() -> NotFoundException.TODOLIST_NOT_FOUND);
         checklist.setComplete();
         log.info("Complete Todolist : {}", checklist);
+        return checklist.getChecklist().getDescription();
     }
 
     @Transactional

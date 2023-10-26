@@ -3,7 +3,8 @@ package com.konkuk.gp.global.thread;
 import com.konkuk.gp.controller.stomp.dto.client.ClientEmergencyCheckDto;
 import com.konkuk.gp.controller.stomp.dto.client.ClientResponseDto;
 import com.konkuk.gp.controller.stomp.dto.client.TriggerType;
-import com.konkuk.gp.global.logger.LogType;
+import com.konkuk.gp.global.logger.DashboardLogger;
+import com.konkuk.gp.global.logger.TopicType;
 import com.konkuk.gp.service.enums.ChatType;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import java.util.TimerTask;
 public class EmergencyCheckRunner implements Runnable {
 
     private final SimpMessagingTemplate template;
+    private final DashboardLogger logger;
     private final int timeOut = 10000;
 
     @Setter
@@ -52,7 +54,7 @@ public class EmergencyCheckRunner implements Runnable {
                 .timeout(timeOut)
                 .reason(caption)
                 .build();
-        template.convertAndSend(LogType.EMERGENCY.getPath(), dto);
+        template.convertAndSend(TopicType.LOG_AI_EMERGENCY.getPath(), dto);
     }
 
     public void sendCheckMessageToClient() {
@@ -63,8 +65,8 @@ public class EmergencyCheckRunner implements Runnable {
                 .type(ChatType.EMERGENCY.getName())
                 .dialogId(-1L)
                 .build();
-
-        template.convertAndSend(LogType.REPLY.getPath(), dto);
+        logger.sendEmergencyCheckLog();
+        template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), dto);
     }
 
     private void sendAlarmMessage() {
@@ -75,6 +77,7 @@ public class EmergencyCheckRunner implements Runnable {
                 .type(ChatType.EMERGENCY.getName())
                 .dialogId(-1L)
                 .build();
-        template.convertAndSend(LogType.REPLY.getPath(), dto);
+        logger.sendEmergencyOccurLog();
+        template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), dto);
     }
 }

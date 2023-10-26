@@ -70,9 +70,9 @@ public class MemberService {
     }
 
     @Transactional
-    public void completeChecklist(Long checklistId, Long memberId) {
+    public String completeChecklist(Long checklistId, Long memberId) {
         Member member = findMemberById(memberId);
-        checklistService.completeChecklist(checklistId, member);
+        return checklistService.completeChecklist(checklistId, member);
     }
 
     @Transactional
