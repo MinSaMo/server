@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface ReplyLog {
 
-    Map<String,String> getReplyLogMessage();
+    Map<String, Object> getReplyLogMessage();
 }

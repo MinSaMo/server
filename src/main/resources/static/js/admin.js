@@ -68,12 +68,9 @@ function onClick() {
     let input = document.getElementById("user_input");
     let str = input.value;
     client.send("/pub/script", {}, JSON.stringify({
-        sender: "CLIENT",
-        data: {
-            script: str,
-            dialogId: 1,
-            isReal: false
-        }
+        script: str,
+        dialogId: 1,
+        isReal: false
     }));
     input.value = "";
 }
