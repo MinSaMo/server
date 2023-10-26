@@ -66,7 +66,7 @@ public class EmergencyCheckRunner implements Runnable {
                 .dialogId(-1L)
                 .build();
         logger.sendEmergencyCheckLog();
-        template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), dto);
+        template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
     }
 
     private void sendAlarmMessage() {
@@ -78,6 +78,6 @@ public class EmergencyCheckRunner implements Runnable {
                 .dialogId(-1L)
                 .build();
         logger.sendEmergencyOccurLog();
-        template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), dto);
+        template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
     }
 }

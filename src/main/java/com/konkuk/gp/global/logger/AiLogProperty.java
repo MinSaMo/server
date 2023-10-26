@@ -58,7 +58,7 @@ public class AiLogProperty implements AiLog {
     public Map<String, Object> getTodoCompleteLogMessage() {
         Map<String, Object> res = getCaptionLogMessage();
         res.put("completeTodo", completedTodolist);
-        return null;
+        return res;
     }
 
     @Override

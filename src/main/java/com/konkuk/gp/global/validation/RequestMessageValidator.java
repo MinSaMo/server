@@ -38,7 +38,6 @@ public class RequestMessageValidator  {
     private Map<String, String> validateClient(ClientRequestDto data) {
         Map<String, String> errors = new HashMap<>();
         if (data.getScript() == null) errors.put("script", "null");
-        if (data.getDialogId() == null) errors.put("dialogId", "null");
         if (data.getIsReal() == null) errors.put("isReal", "null");
         return errors;
     }
