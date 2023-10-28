@@ -12,15 +12,13 @@ public class ClientResponseDto {
     private String script;
     // TODO : enum
     private String type;
-    private int situation;
     private Long dialogId;
     private String responseTime;
 
     @Builder
-    public ClientResponseDto(String script, String type, TriggerType triggerType, Long dialogId, Long time) {
+    public ClientResponseDto(String script, String type, Long dialogId, Long time) {
         this.script = script;
         this.type = type;
-        this.situation = triggerType.getVal();
         this.dialogId = dialogId;
         double seconds = (double) time / 1000.0;
         String formattedSeconds = String.format("%.2f", seconds);
