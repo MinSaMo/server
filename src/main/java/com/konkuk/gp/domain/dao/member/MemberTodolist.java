@@ -1,6 +1,6 @@
 package com.konkuk.gp.domain.dao.member;
 
-import com.konkuk.gp.domain.dao.Checklist;
+import com.konkuk.gp.domain.dao.Todolist;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +10,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Setter
 @Getter
-public class MemberChecklist {
+public class MemberTodolist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -27,10 +27,10 @@ public class MemberChecklist {
 
     @ManyToOne
     @JoinColumn(name = "mc_checklist_id")
-    private Checklist checklist;
+    private Todolist checklist;
 
     @Builder
-    public MemberChecklist(Member member, Checklist checklist) {
+    public MemberTodolist(Member member, Todolist checklist) {
         this.member = member;
         this.checklist = checklist;
         isCompleted = false;

@@ -19,9 +19,14 @@ public class DashboardLogger {
     private final SimpMessagingTemplate template;
     private final ObjectProvider<ClientLogProperty> clientLogPropertyProvider;
     private final ObjectProvider<AiLogProperty> aiLogPropertyProvider;
+    private final UserInformationLogProperty userInformationLogProperty;
 
     private ClientLogProperty clientLogProperty;
     private AiLogProperty aiLogProperty;
+    
+    public void sendUserInformationLog() {
+        template.convertAndSend(TopicType.LOG_DB_USERINFO.getPath(), userInformationLogProperty.getUserInformationLog());
+    }
 
     public void sendCaptionLog(String caption, Long memberId) {
         aiLogProperty = aiLogPropertyProvider.getObject();
@@ -48,7 +53,8 @@ public class DashboardLogger {
         }
     }
 
-    public void sendTodoCompleteLog(List<String> todo) {
+    public void sendTodoCompleteLog(List<String> todo, String caption) {
+        template.convertAndSend(TopicType.LOG_DB_USERINFO.getPath(), userInformationLogProperty.getUserInformationLog());
         if (aiLogProperty != null) {
             aiLogProperty.setCompletedTodolist(todo);
 

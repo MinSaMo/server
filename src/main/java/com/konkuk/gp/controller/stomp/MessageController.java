@@ -102,6 +102,11 @@ public class MessageController {
                 .build();
     }
 
+    @MessageMapping("/user-info")
+    public void sendUserInformation() {
+        logger.sendUserInformationLog();
+    }
+
     private void startBackgroundJob(Runnable runnable) {
         new Thread(runnable).start();
     }

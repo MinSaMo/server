@@ -13,22 +13,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Setter
 @Getter
-public class Checklist {
+public class Todolist {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "chk_id")
+    @Column(name = "td_id")
     private Long id;
 
-    @Column(name = "chk_descrption")
+    @Column(name = "td_descrption")
     private String description;
 
-    @Column(name = "chk_deadline")
+    @Column(name = "td_deadline")
     @JsonFormat(pattern = "yyyy-MM-dd hh:mm")
     private LocalDateTime deadline;
-
-    @Builder.Default
-    @Column(name = "chk_is_complete")
-    private Boolean isComplete = false;
 
     @Override
     public String toString() {

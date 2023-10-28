@@ -2,16 +2,16 @@ package com.konkuk.gp.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.konkuk.gp.global.logger.DashboardLogger;
-import com.konkuk.gp.service.enums.ChatType;
-import com.konkuk.gp.domain.dao.Checklist;
+import com.konkuk.gp.domain.dao.Todolist;
 import com.konkuk.gp.domain.dao.member.Member;
-import com.konkuk.gp.domain.dao.member.MemberChecklist;
+import com.konkuk.gp.domain.dao.member.MemberTodolist;
 import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.domain.dto.response.EmergencyCheckDto;
 import com.konkuk.gp.domain.dto.response.IntenseResponseDto;
 import com.konkuk.gp.domain.dto.response.TodoListResponseDto;
+import com.konkuk.gp.global.logger.DashboardLogger;
+import com.konkuk.gp.service.enums.ChatType;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import io.github.flashvayne.chatgpt.property.ChatgptProperties;
 import io.github.flashvayne.chatgpt.property.MultiChatProperties;
@@ -166,8 +166,8 @@ public class GptService {
         List<MultiChatMessage> messages = new ArrayList<>();
         messages.add(new MultiChatMessage("system", checkTodoListSystemScript));
 
-        List<Checklist> list = member.getChecklistList()
-                .stream().map(MemberChecklist::getChecklist).toList();
+        List<Todolist> list = member.getChecklistList()
+                .stream().map(MemberTodolist::getChecklist).toList();
 
         StringBuilder sb = new StringBuilder();
         sb.append("input : ")
@@ -175,7 +175,7 @@ public class GptService {
                 .append(",")
                 .append("checklist : [");
 
-        for (Checklist checklist : list) {
+        for (Todolist checklist : list) {
             sb.append(checklist.toString()).append(",");
         }
         sb.append("]");

@@ -1,11 +1,11 @@
 package com.konkuk.gp.service;
 
-import com.konkuk.gp.domain.dao.Checklist;
-import com.konkuk.gp.domain.dao.ChecklistRepository;
+import com.konkuk.gp.domain.dao.Todolist;
+import com.konkuk.gp.domain.dao.TodolistRepository;
 import com.konkuk.gp.domain.dao.member.Member;
-import com.konkuk.gp.domain.dao.member.MemberChecklist;
-import com.konkuk.gp.domain.dao.member.MemberChecklistRepository;
-import com.konkuk.gp.domain.dto.request.ChecklistCreateDto;
+import com.konkuk.gp.domain.dao.member.MemberTodolist;
+import com.konkuk.gp.domain.dao.member.MemberTodolistRepository;
+import com.konkuk.gp.domain.dto.request.TodolistCreateDto;
 import com.konkuk.gp.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ChecklistService {
+public class TodolistService {
 
-    private final ChecklistRepository checklistRepository;
-    private final MemberChecklistRepository memberChecklistRepository;
+    private final TodolistRepository checklistRepository;
+    private final MemberTodolistRepository memberChecklistRepository;
 
     @Transactional
-    public String completeChecklist(Long checklistId, Member member) {
-        MemberChecklist checklist = member.getChecklistList().stream()
+    public String completeTodolist(Long checklistId, Member member) {
+        MemberTodolist checklist = member.getChecklistList().stream()
                 .filter(mc -> mc.getChecklist().getId().equals(checklistId))
                 .findFirst()
                 .orElseThrow(() -> NotFoundException.TODOLIST_NOT_FOUND);
@@ -32,15 +32,15 @@ public class ChecklistService {
     }
 
     @Transactional
-    public Checklist saveChecklist(ChecklistCreateDto dto) {
-        Checklist checklist = toEntity(dto);
+    public Todolist saveTodolist(TodolistCreateDto dto) {
+        Todolist checklist = toEntity(dto);
         return checklistRepository.save(checklist);
     }
 
     @Transactional
-    public Checklist saveChecklist(ChecklistCreateDto dto, Member member) {
-        Checklist checklist = this.saveChecklist(dto);
-        MemberChecklist memberChecklist = MemberChecklist.builder()
+    public Todolist saveTodolist(TodolistCreateDto dto, Member member) {
+        Todolist checklist = this.saveTodolist(dto);
+        MemberTodolist memberChecklist = MemberTodolist.builder()
                 .checklist(checklist)
                 .member(member)
                 .build();
@@ -48,8 +48,8 @@ public class ChecklistService {
         return checklist;
     }
 
-    public Checklist toEntity(ChecklistCreateDto dto) {
-        return Checklist.builder()
+    public Todolist toEntity(TodolistCreateDto dto) {
+        return Todolist.builder()
                 .deadline(dto.deadline())
                 .description(dto.description())
                 .build();

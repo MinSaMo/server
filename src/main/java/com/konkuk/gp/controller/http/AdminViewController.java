@@ -17,4 +17,9 @@ public class AdminViewController {
     public String logPage() {
         return "log";
     }
+
+    @GetMapping("/userinfo")
+    public String userInfoLogPage() {
+        return "user-info";
+    }
 }
