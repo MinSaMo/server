@@ -2,10 +2,10 @@ var url = "ws://localhost:8080/ws";
 var client = Stomp.client(url);
 
 function connect_callback() {
-    client.subscribe("/sub/script", onScript);
-    client.subscribe("/sub/intense", onIntense);
-    client.subscribe("/sub/prompt", onPrompt);
-    client.subscribe("/sub/reply", onReply);
+    client.subscribe("/topic/log/client/script", onScript);
+    client.subscribe("/topic/log/client/intense", onIntense);
+    client.subscribe("/topic/log/client/prompt", onPrompt);
+    client.subscribe("/topic/log/client/reply", onReply);
 }
 
 function error_callback() {
