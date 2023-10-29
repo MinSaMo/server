@@ -2,7 +2,6 @@ package com.konkuk.gp.global.thread;
 
 import com.konkuk.gp.controller.stomp.dto.client.ClientEmergencyCheckDto;
 import com.konkuk.gp.controller.stomp.dto.client.ClientResponseDto;
-import com.konkuk.gp.controller.stomp.dto.client.TriggerType;
 import com.konkuk.gp.global.logger.DashboardLogger;
 import com.konkuk.gp.global.logger.TopicType;
 import com.konkuk.gp.service.enums.ChatType;
@@ -61,7 +60,6 @@ public class EmergencyCheckRunner implements Runnable {
         ClientResponseDto dto = ClientResponseDto.builder()
                 .script("응급상황인가요?")
                 .time(0L)
-                .triggerType(TriggerType.BY_EMERGENCY)
                 .type(ChatType.EMERGENCY.getName())
                 .dialogId(-1L)
                 .build();
@@ -73,7 +71,6 @@ public class EmergencyCheckRunner implements Runnable {
         ClientResponseDto dto = ClientResponseDto.builder()
                 .script("응급상황 조치 실행")
                 .time(0L)
-                .triggerType(TriggerType.BY_EMERGENCY)
                 .type(ChatType.EMERGENCY.getName())
                 .dialogId(-1L)
                 .build();

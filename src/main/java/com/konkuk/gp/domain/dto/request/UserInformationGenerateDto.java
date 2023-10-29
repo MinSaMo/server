@@ -5,7 +5,7 @@ import java.util.List;
 public record UserInformationGenerateDto(
 
         List<String> diseases,
-        List<ChecklistCreateDto> todoList,
+        List<TodolistCreateDto> todoList,
         List<String> preferredFoods
 
 ) {

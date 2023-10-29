@@ -2,12 +2,12 @@ package com.konkuk.gp.controller.http;
 
 import com.konkuk.gp.controller.http.dto.FoodDto;
 import com.konkuk.gp.service.dialog.DialogManager;
-import com.konkuk.gp.domain.dao.Checklist;
+import com.konkuk.gp.domain.dao.Todolist;
 import com.konkuk.gp.domain.dao.Disease;
 import com.konkuk.gp.domain.dao.member.Member;
-import com.konkuk.gp.domain.dto.request.ChecklistCreateDto;
+import com.konkuk.gp.domain.dto.request.TodolistCreateDto;
 import com.konkuk.gp.domain.dto.request.DiseaseCreateDto;
-import com.konkuk.gp.service.ChecklistService;
+import com.konkuk.gp.service.TodolistService;
 import com.konkuk.gp.service.DiseaseService;
 import com.konkuk.gp.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final DiseaseService diseaseService;
-    private final ChecklistService checklistService;
+    private final TodolistService checklistService;
     private final DialogManager dialogManager;
 
     // Get Information
@@ -36,12 +36,12 @@ public class MemberController {
     }
 
     @PostMapping("/todo/{memberId}")
-    public ResponseEntity<Checklist> createTodo(
-            @RequestBody ChecklistCreateDto dto,
+    public ResponseEntity<Todolist> createTodo(
+            @RequestBody TodolistCreateDto dto,
             @PathVariable Long memberId
     ) {
         Member member = memberService.findMemberById(memberId);
-        Checklist checklist = checklistService.saveChecklist(dto, member);
+        Todolist checklist = checklistService.saveTodolist(dto, member);
         dialogManager.sendUserInfo();
         return ResponseEntity.ok(checklist);
     }

@@ -1,5 +1,6 @@
 package com.konkuk.gp.service;
 
+import com.konkuk.gp.service.dialog.DialogManager;
 import com.konkuk.gp.service.dialog.TimerEnd;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import java.util.TimerTask;
 @RequiredArgsConstructor
 public class DialogTimerService {
 
+    private final DialogManager dialogManager;
     private final int timeOut = 10 * 1000;
     private Timer timer = null;
     private boolean isRun;
@@ -51,6 +53,7 @@ public class DialogTimerService {
     @TimerEnd
     public void endDialog() {
         log.info("[Timer] Timer End");
+        dialogManager.endDialog();
         timer = null;
         isRun = false;
     }

@@ -20,7 +20,11 @@ public enum TopicType {
     LOG_AI_EMERGENCY_CHECK("/topic/log/ai/emerge_check"),
     LOG_AI_EMERGENCY_OCCUR("/topic/log/ai/emerge_occur"),
     LOG_AI_COMPLETE_TODO("/topic/log/ai/complete_todo"),
-    LOG_AI_REPLY("/topic/log/ai/reply")
+    LOG_AI_REPLY("/topic/log/ai/reply"),
+
+    // For DB Log
+    LOG_DB_USERINFO("/topic/log/user/information"),
+    LOG_CHAT("/topic/log/chat")
     ;
 
     private final String path;

@@ -1,12 +1,12 @@
 package com.konkuk.gp.domain.dto.response;
 
-import com.konkuk.gp.domain.dao.Checklist;
+import com.konkuk.gp.domain.dao.Todolist;
 
 import java.util.List;
 
 public record UserInformationResponseDto(
         List<String> diseases,
-        List<Checklist> todoList,
+        List<Todolist> todoList,
         List<String> preferredFoods
 ) {
 }

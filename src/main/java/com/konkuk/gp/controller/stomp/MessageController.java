@@ -3,7 +3,6 @@ package com.konkuk.gp.controller.stomp;
 import com.konkuk.gp.controller.stomp.dto.ai.AiRequestDto;
 import com.konkuk.gp.controller.stomp.dto.client.ClientRequestDto;
 import com.konkuk.gp.controller.stomp.dto.client.ClientResponseDto;
-import com.konkuk.gp.controller.stomp.dto.client.TriggerType;
 import com.konkuk.gp.domain.dto.response.DialogResponseDto;
 import com.konkuk.gp.domain.dto.response.EmergencyCheckDto;
 import com.konkuk.gp.global.logger.DashboardLogger;
@@ -61,7 +60,6 @@ public class MessageController {
         logger.sendReplyLog(reply.response());
         return ClientResponseDto.builder()
                 .script(reply.response())
-                .triggerType(TriggerType.BY_USER)
                 .dialogId(dialogId)
                 .type(chatType.getName())
                 .time(time)
@@ -98,11 +96,15 @@ public class MessageController {
         logger.sendCaptionReplyLog(response.response());
         return ClientResponseDto.builder()
                 .script(response.response())
-                .triggerType(TriggerType.BY_CAPTION)
                 .dialogId(-1L)
                 .type(ChatType.ADVICE.getName())
                 .time(time)
                 .build();
+    }
+
+    @MessageMapping("/user-info")
+    public void sendUserInformation() {
+        logger.sendUserInformationLog();
     }
 
     private void startBackgroundJob(Runnable runnable) {

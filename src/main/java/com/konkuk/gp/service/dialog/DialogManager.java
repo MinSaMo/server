@@ -4,6 +4,8 @@ import com.konkuk.gp.domain.dao.dialog.DialogHistory;
 import com.konkuk.gp.domain.dao.dialog.DialogHistoryRepository;
 import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.gp.domain.dto.response.UserInformationResponseDto;
+import com.konkuk.gp.global.logger.DashboardLogger;
+import com.konkuk.gp.global.logger.UserInformationLogProperty;
 import com.konkuk.gp.service.GptService;
 import com.konkuk.gp.service.MemberService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
@@ -26,6 +28,9 @@ public class DialogManager {
     private final MemberService memberService;
     private final GptService gptService;
     private final DialogHistoryRepository dialogHistoryRepository;
+
+    private final UserInformationLogProperty userLogProperty;
+    private final DashboardLogger logger;
 
     private boolean isRun;
     @Getter
@@ -109,6 +114,8 @@ public class DialogManager {
     public void generateUserInformation() {
         UserInformationGenerateDto information = gptService.generateUserInformation(currentHistory);
         memberService.saveInformation(information, memberId);
+        userLogProperty.load();
+        logger.sendUserInformationLog();
     }
 
     public void sendUserInfo() {

@@ -27,7 +27,7 @@ public class Member {
 
     @Builder.Default
     @OneToMany(mappedBy = "member")
-    private List<MemberChecklist> checklistList = new ArrayList<>();
+    private List<MemberTodolist> checklistList = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "member")
