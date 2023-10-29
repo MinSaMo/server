@@ -1,5 +1,6 @@
 package com.konkuk.gp.global.logger;
 
+import com.konkuk.gp.global.logger.message.user.ChatLog;
 import com.konkuk.gp.service.enums.ChatType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class DashboardLogger {
 
     private ClientLogProperty clientLogProperty;
     private AiLogProperty aiLogProperty;
-    
+
     public void sendUserInformationLog() {
         template.convertAndSend(TopicType.LOG_DB_USERINFO.getPath(), userInformationLogProperty.getUserInformationLog());
     }
@@ -77,6 +78,7 @@ public class DashboardLogger {
         clientLogProperty.setDialogId(dialogId);
         clientLogProperty.setUuid(UUID.randomUUID());
         template.convertAndSend(TopicType.LOG_CLIENT_SCRIPT.getPath(), clientLogProperty.getScriptLogMessage());
+        template.convertAndSend(TopicType.LOG_CHAT.getPath(), new ChatLog(ChatLog.SENDER_USER, script));
     }
 
     public void sendIntenseLog(ChatType intense) {
@@ -96,6 +98,7 @@ public class DashboardLogger {
     public void sendReplyLog(String reply) {
         clientLogProperty.setReply(reply);
         template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), clientLogProperty.getReplyLogMessage());
+        template.convertAndSend(TopicType.LOG_CHAT.getPath(),new ChatLog(ChatLog.SENDER_DAILA,reply));
     }
 
 }

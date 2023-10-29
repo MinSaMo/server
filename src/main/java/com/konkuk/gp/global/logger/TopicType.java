@@ -24,6 +24,7 @@ public enum TopicType {
 
     // For DB Log
     LOG_DB_USERINFO("/topic/log/user/information"),
+    LOG_CHAT("/topic/log/chat")
     ;
 
     private final String path;
