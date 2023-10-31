@@ -28,6 +28,6 @@ jobs:
             git checkout develop
             git pull
             sudo ./gradlew build
-            sudo docker-compose --rmi down
+            sudo docker-compose down --rmi all
             sudo docker-compose up -d
      
