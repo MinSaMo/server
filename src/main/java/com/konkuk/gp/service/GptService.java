@@ -61,6 +61,10 @@ public class GptService {
     @Setter
     private String message;
 
+
+    public String responseWithLLM(List<MultiChatMessage> messages) {
+        return chatgptService.multiChat(messages);
+    }
     public DialogResponseDto ask(String script, ChatType type, Long memberId, List<MultiChatMessage> currentDialog) {
         switch (type) {
             case DAILY, ADVICE -> {

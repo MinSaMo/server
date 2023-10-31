@@ -38,14 +38,14 @@ public class RequestMessageValidator  {
     private Map<String, String> validateClient(ClientRequestDto data) {
         Map<String, String> errors = new HashMap<>();
         if (data.getScript() == null) errors.put("script", "null");
-        if (data.getIsReal() == null) errors.put("isReal", "null");
+//        if (data.getIsReal() == null) errors.put("isReal", "null");
         return errors;
     }
 
     private Map<String, String> validateAI(AiRequestDto data) {
         Map<String, String> errors = new HashMap<>();
         if (data.getCaption() == null) errors.put("caption", "null");
-        if (data.getIsReal() == null) errors.put("isReal", "null");
+//        if (data.getIsReal() == null) errors.put("isReal", "null");
         return errors;
     }
 }

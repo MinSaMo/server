@@ -40,6 +40,9 @@ public class DialogManager {
     private Long memberId;
     @Getter
     private List<MultiChatMessage> currentHistory;
+
+    @Getter
+    private List<MultiChatMessage> gptHistory;
     private Long sequence;
 
     @PostConstruct
@@ -48,6 +51,13 @@ public class DialogManager {
         dialogId = 0L;
         memberId = 1L;
         sequence = 1L;
+
+        // LLM
+        gptHistory = new ArrayList<>();
+    }
+
+    public void addChatToGpt(MultiChatMessage message) {
+        gptHistory.add(message);
     }
 
     public Long startDialog() {

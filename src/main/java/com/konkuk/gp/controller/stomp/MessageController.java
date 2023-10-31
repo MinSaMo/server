@@ -13,12 +13,15 @@ import com.konkuk.gp.service.GptService;
 import com.konkuk.gp.service.dialog.DialogManager;
 import com.konkuk.gp.service.dialog.TimerStart;
 import com.konkuk.gp.service.enums.ChatType;
+import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 @Slf4j
@@ -31,6 +34,27 @@ public class MessageController {
     private final ObjectProvider<TodolistCheckRunner> todolistCheckerProvider;
 
     private final DashboardLogger logger;
+
+    @MessageMapping("/gpt")
+    @SendTo("/topic/service/reply_gpt")
+    public ClientResponseDto dialogWithLLM(
+            ClientResponseDto dto
+    ) {
+        long start = System.currentTimeMillis();
+        String script = dto.getScript();
+        MultiChatMessage userMessage = new MultiChatMessage("user", script);
+        dialogManager.addChatToGpt(userMessage);
+        List<MultiChatMessage> history = dialogManager.getGptHistory();
+
+        String reply = gptService.responseWithLLM(history);
+        long time = System.currentTimeMillis() - start;
+        return ClientResponseDto.builder()
+                .type(ChatType.LLM.getName())
+                .dialogId(-1L)
+                .script(reply)
+                .time(time)
+                .build();
+    }
 
     @MessageMapping("/script")
     @SendTo("/topic/service/reply")
