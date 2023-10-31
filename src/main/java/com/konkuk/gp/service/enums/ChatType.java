@@ -3,6 +3,7 @@ package com.konkuk.gp.service.enums;
 import lombok.Getter;
 
 public enum ChatType {
+    LLM(0, "LLM"),
     ADVICE(1, "ADVICE"),
     DAILY(2, "DAILY"),
     EMERGENCY(3, "EMERGENCY");
