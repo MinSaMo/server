@@ -1,13 +1,12 @@
 package com.konkuk.gp.service;
 
-import com.konkuk.gp.core.socket.handler.dashboard.UserInformationHandler;
+import com.konkuk.gp.domain.dao.Disease;
+import com.konkuk.gp.domain.dao.Todolist;
+import com.konkuk.gp.domain.dao.member.*;
+import com.konkuk.gp.domain.dto.request.DiseaseCreateDto;
+import com.konkuk.gp.domain.dto.request.TodolistCreateDto;
 import com.konkuk.gp.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.gp.domain.dto.response.UserInformationResponseDto;
-import com.konkuk.gp.domain.dao.Checklist;
-import com.konkuk.gp.domain.dao.Disease;
-import com.konkuk.gp.domain.dao.member.*;
-import com.konkuk.gp.domain.dto.request.ChecklistCreateDto;
-import com.konkuk.gp.domain.dto.request.DiseaseCreateDto;
 import com.konkuk.gp.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,17 +21,15 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final DiseaseService diseaseService;
-    private final ChecklistService checklistService;
+    private final TodolistService checklistService;
     private final PreferredFoodRepository preferredFoodRepository;
-
-    private final UserInformationHandler userInformationHandler;
 
     @Transactional
     public void saveInformation(UserInformationGenerateDto dto, Long memberId) {
 
         List<String> diseases = dto.diseases();
         List<String> preferredFoods = dto.preferredFoods();
-        List<ChecklistCreateDto> checklistCreateDtoList = dto.todoList();
+        List<TodolistCreateDto> checklistCreateDtoList = dto.todoList();
 
         if (diseases != null) {
             diseases.forEach(
@@ -67,15 +64,15 @@ public class MemberService {
     }
 
     @Transactional
-    public void addChecklist(ChecklistCreateDto dto, Long memberId) {
+    public void addChecklist(TodolistCreateDto dto, Long memberId) {
         Member member = findMemberById(memberId);
-        Checklist checklist = checklistService.saveChecklist(dto, member);
+        Todolist checklist = checklistService.saveTodolist(dto, member);
     }
 
     @Transactional
-    public void completeChecklist(Long checklistId, Long memberId) {
+    public String completeChecklist(Long checklistId, Long memberId) {
         Member member = findMemberById(memberId);
-        checklistService.completeChecklist(checklistId, member);
+        return checklistService.completeTodolist(checklistId, member);
     }
 
     @Transactional
@@ -102,8 +99,8 @@ public class MemberService {
                 .map(ds -> ds.getDisease().getName())
                 .toList();
 
-        List<Checklist> checklist = member.getChecklistList().stream()
-                .map(MemberChecklist::getChecklist)
+        List<Todolist> checklist = member.getChecklistList().stream()
+                .map(MemberTodolist::getChecklist)
                 .toList();
 
         List<String> foods = member.getFoodList().stream()
@@ -113,7 +110,7 @@ public class MemberService {
     }
 
     @Transactional
-    public List<MemberChecklist> getTodolist(Long memberId) {
+    public List<MemberTodolist> getTodolist(Long memberId) {
         Member member = findMemberById(memberId);
         return member.getChecklistList();
     }
@@ -134,7 +131,7 @@ public class MemberService {
         sb.append("],");
 
         sb.append("user's todolist : [");
-        for (Checklist chk : dto.todoList()) {
+        for (Todolist chk : dto.todoList()) {
             sb.append("{");
             sb.append("\"description:\"" + chk.getDescription() + ",");
             sb.append("\"deadline:\"" + chk.getDeadline().toString() + ",");
