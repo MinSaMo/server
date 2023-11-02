@@ -1,5 +1,7 @@
 package com.konkuk.gp.config;
 
+import com.konkuk.gp.domain.dao.Disease;
+import com.konkuk.gp.domain.dao.DiseaseRepository;
 import com.konkuk.gp.domain.dao.Todolist;
 import com.konkuk.gp.domain.dao.TodolistRepository;
 import com.konkuk.gp.domain.dao.member.*;
@@ -23,6 +25,8 @@ public class DatabaseInitConfiguration {
     private final MemberTodolistRepository memberTodolistRepository;
 
     private final PreferredFoodRepository foodRepository;
+    private final DiseaseRepository diseaseRepository;
+    private final MemberDiseaseRepository memberDiseaseRepository;
 
     private final DialogManager dialogManager;
     private final UserInformationLogProperty logProperty;
@@ -30,36 +34,38 @@ public class DatabaseInitConfiguration {
     @PostConstruct
     @Transactional
     public void init() {
-        memberRepository.deleteAll();
         Member member = memberRepository.save(Member.builder()
-                .name("testMember")
+                .name("권순재")
                 .build());
         dialogManager.setMemberId(member.getId());
         logProperty.setMemberId(member.getId());
-        log.info("[Service Mock Init] Member : {}", member.toString());
 
         foodRepository.save(foodRepository.save(PreferredFood.builder()
                 .member(member)
-                .name("매운 음식 선호")
+                .name("매운 음식")
                 .build()));
-
-        log.info("[Service Mock Init] food : {}", "매운 음식 선호");
-
         foodRepository.save(foodRepository.save(PreferredFood.builder()
                 .member(member)
-                .name("버섯이 들어간 음식 비선호")
+                .name("일식")
                 .build()));
-        log.info("[Service Mock Init] food : {}", "버섯이 들어간 음식 비선호");
 
         Todolist checklist = todolistRepository.save(Todolist.builder()
-                .description("cook")
-                .deadline(LocalDateTime.now().plusDays(1))
+                .description("일곱 난쟁이팀 응원하기")
+                .deadline(LocalDateTime.of(2023, 11, 3, 17, 0))
                 .build());
         memberTodolistRepository.save(MemberTodolist.builder()
                 .checklist(checklist)
                 .member(member)
                 .build());
-        log.info("[Service Mock Init] todo : {}", "cook");
+
+        Disease dis = diseaseRepository.save(Disease.builder()
+                .name("조현정동장애")
+                .build());
+
+        memberDiseaseRepository.save(MemberDisease.builder()
+                .disease(dis)
+                .member(member)
+                .build());
 
         logProperty.load();
     }

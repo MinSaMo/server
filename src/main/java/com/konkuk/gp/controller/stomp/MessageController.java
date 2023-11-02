@@ -22,6 +22,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Random;
 
 @Controller
 @Slf4j
@@ -48,6 +49,17 @@ public class MessageController {
 
         String reply = gptService.responseWithLLM(history);
         long time = System.currentTimeMillis() - start;
+        if (time <= 10000) {
+            try {
+                Random random = new Random();
+                int randomInterval = random.nextInt(7000) + 5000;
+                time += randomInterval;
+                log.info("[GPT] interval : {}", randomInterval);
+                Thread.sleep(randomInterval);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return ClientResponseDto.builder()
                 .type(ChatType.LLM.getName())
                 .dialogId(-1L)

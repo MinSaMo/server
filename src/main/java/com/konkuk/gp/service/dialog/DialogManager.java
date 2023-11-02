@@ -122,7 +122,7 @@ public class DialogManager {
      */
     @Transactional
     public void generateUserInformation() {
-        UserInformationGenerateDto information = gptService.generateUserInformation(currentHistory);
+        UserInformationGenerateDto information = gptService.generateUserInformation(currentHistory,memberId);
         memberService.saveInformation(information, memberId);
         userLogProperty.load();
         logger.sendUserInformationLog();
