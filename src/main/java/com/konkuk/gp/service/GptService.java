@@ -23,9 +23,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpServerErrorException;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -39,9 +42,11 @@ public class GptService {
     private final ChatgptProperties chatgptProperties;
 
     private final DashboardLogger logger;
-
     private final String SYSTEM_INTENSE = "intense";
     private final String SYSTEM_GLOBAL = "global";
+    private final String SERVER_ERR_MSG = "Sorry, Server Error on Remote GPT. Please re-send message.";
+
+    private AtomicInteger counter = new AtomicInteger(0);
 
     @Value("${gpt.system.intense}")
     private String intenseSystemScript;
@@ -55,6 +60,13 @@ public class GptService {
     private String checkTodoListSystemScript;
     @Value("${gpt.system.check-emergency}")
     private String checkEmergencySystemScript;
+    @Value("${gpt.system.llm}")
+    private String llmSystemScript;
+
+    @Value("${gpt.api-key}")
+    private String mainKey;
+    @Value("${gpt.sub-key}")
+    private String subKey;
 
     @Setter
     private String userInformation;
@@ -62,9 +74,46 @@ public class GptService {
     private String message;
 
 
-    public String responseWithLLM(List<MultiChatMessage> messages) {
-        return chatgptService.multiChat(messages);
+    public String chatProxy(List<MultiChatMessage> messages) {
+
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        String res = null;
+        try {
+            Future<String> future = executor.submit(() -> {
+                return chatgptService.multiChat(messages);
+            });
+
+            res = future.get(60, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            res = null;
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            executor.shutdown();
+        }
+        return res;
     }
+
+    public String responseWithLLM(List<MultiChatMessage> messages) {
+        if (messages.size() == 1) {
+            String system = globalSystemScript + llmSystemScript;
+            MultiChatMessage userMessage = messages.get(0);
+            userMessage.setContent(system + userMessage.getContent());
+        }
+        try {
+            chatgptProperties.setApiKey(subKey);
+            String res = chatProxy(messages);
+            if (res == null) return SERVER_ERR_MSG;
+            DialogResponseDto obj = objectMapper.readValue(res, DialogResponseDto.class);
+            chatgptProperties.setApiKey(mainKey);
+            return obj.response();
+        } catch (HttpServerErrorException e) {
+            return SERVER_ERR_MSG;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public DialogResponseDto ask(String script, ChatType type, Long memberId, List<MultiChatMessage> currentDialog) {
         switch (type) {
             case DAILY, ADVICE -> {
@@ -78,12 +127,21 @@ public class GptService {
     }
 
     public ChatType determineIntense(String script) {
+        MultiChatProperties multi = chatgptProperties.getMulti();
+
+        double originalTopP = multi.getTopP();
+        double originalTemperature = multi.getTemperature();
+
+        multi.setTopP(0.3);
+        multi.setTemperature(0.1);
+
         MultiChatMessage systemDefinition = getSystemDefinition(SYSTEM_INTENSE);
-        log.info("[INTENSE] System script : {}", systemDefinition);
         List<MultiChatMessage> messages = Arrays.asList(systemDefinition, new MultiChatMessage("user", script));
-        log.info("[INTENSE] Prompt : {}", script);
-        String response = chatgptService.multiChat(messages);
-        log.info("[INTENSE] Response : {}", response);
+        String response = chatProxy(messages);
+        if(response==null) return ChatType.SERVER_ERR;
+
+        multi.setTopP(originalTopP);
+        multi.setTemperature(originalTemperature);
         try {
             IntenseResponseDto result = objectMapper.readValue(response, IntenseResponseDto.class);
             return ChatType.of(result.answerTypeIndex());
@@ -109,11 +167,16 @@ public class GptService {
         messages.add(new MultiChatMessage("user", prompt));
         logger.sendPromptLog(prompt);
 
-        String response = chatgptService.multiChat(messages);
         try {
+            String response = chatProxy(messages);
+            if (response == null) {
+                return new DialogResponseDto(SERVER_ERR_MSG);
+            }
             return objectMapper.readValue(response, DialogResponseDto.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
+        } catch (HttpServerErrorException e) {
+            return new DialogResponseDto(SERVER_ERR_MSG);
         }
     }
 
@@ -248,4 +311,5 @@ public class GptService {
         }
         throw new RuntimeException();
     }
+
 }

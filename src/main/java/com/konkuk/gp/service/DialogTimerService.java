@@ -16,7 +16,7 @@ import java.util.TimerTask;
 public class DialogTimerService {
 
     private final DialogManager dialogManager;
-    private final int timeOut = 10 * 1000;
+    private final int timeOut = 30 * 1000;
     private Timer timer = null;
     private boolean isRun;
 
@@ -28,7 +28,17 @@ public class DialogTimerService {
     public void start() {
         if (timer == null) timer = new Timer();
         reset();
+        isRun = true;
         log.info("[Timer] Timer start");
+    }
+
+    public void stop() {
+        if(isRun) {
+            timer.cancel();
+            timer.purge();
+            timer = new Timer();
+            isRun = false;
+        }
     }
 
     public void reset() {
