@@ -6,7 +6,8 @@ public enum ChatType {
     LLM(0, "LLM"),
     ADVICE(1, "ADVICE"),
     DAILY(2, "DAILY"),
-    EMERGENCY(3, "EMERGENCY");
+    EMERGENCY(3, "EMERGENCY"),
+    SERVER_ERR(-1, "SERVER_ERR"),;
 
     private final int val;
     @Getter

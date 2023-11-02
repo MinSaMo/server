@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -20,6 +21,11 @@ public class DialogTimerAdvisor {
     @After("@annotation(com.konkuk.gp.service.dialog.TimerStart)")
     public void timerStart(JoinPoint joinPoint) {
         timer.start();
+    }
+
+    @Before("@annotation(com.konkuk.gp.service.dialog.TimerStart)")
+    public void timerStartBeforeChat(JoinPoint joinPoint) {
+        timer.stop();
     }
 
     @After("@annotation(com.konkuk.gp.service.dialog.TimerEnd)")

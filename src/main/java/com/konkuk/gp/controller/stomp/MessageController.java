@@ -71,6 +71,15 @@ public class MessageController {
         logger.sendScriptLog(script, memberId, dialogId);
         ChatType chatType = gptService.determineIntense(script);
         logger.sendIntenseLog(chatType);
+        if (chatType.equals(ChatType.SERVER_ERR)) {
+            long time = System.currentTimeMillis() - start;
+            return ClientResponseDto.builder()
+                    .script("Sorry, Server Error on Remote GPT. Please resend message.")
+                    .dialogId(dialogId)
+                    .type(chatType.getName())
+                    .time(time)
+                    .build();
+        }
 
         DialogResponseDto reply = gptService.ask(
                 script,
