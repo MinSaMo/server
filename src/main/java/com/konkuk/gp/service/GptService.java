@@ -204,10 +204,10 @@ public class GptService {
         String informationString = memberService.getInformationString(memberId);
         String system = setPromptParams(infoSystemScript, params);
         messages.add(new MultiChatMessage("system", system));
-        params = new HashMap<>();
-        params.put("$user-info", informationString);
-        String infoDump = setPromptParams(informationDumpScript, params);
-        messages.add(new MultiChatMessage("user", infoDump));
+//        params = new HashMap<>();
+//        params.put("$user-info", informationString);
+//        String infoDump = setPromptParams(informationDumpScript, params);
+//        messages.add(new MultiChatMessage("user", infoDump));
 
         String response = chatgptService.multiChat(messages);
 
