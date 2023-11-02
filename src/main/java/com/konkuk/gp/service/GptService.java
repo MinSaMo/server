@@ -62,7 +62,8 @@ public class GptService {
     private String checkEmergencySystemScript;
     @Value("${gpt.system.llm}")
     private String llmSystemScript;
-
+    @Value("${gpt.prompt.information-dump}")
+    private String informationDumpScript;
     @Value("${gpt.api-key}")
     private String mainKey;
     @Value("${gpt.sub-key}")
@@ -95,11 +96,9 @@ public class GptService {
     }
 
     public String responseWithLLM(List<MultiChatMessage> messages) {
-        if (messages.size() == 1) {
-            String system = globalSystemScript + llmSystemScript;
-            MultiChatMessage userMessage = messages.get(0);
-            userMessage.setContent(system + userMessage.getContent());
-        }
+        String system = llmSystemScript;
+        MultiChatMessage userMessage = messages.get(messages.size() - 1);
+        userMessage.setContent(system + userMessage.getContent());
         try {
             chatgptProperties.setApiKey(subKey);
             String res = chatProxy(messages);
@@ -138,7 +137,7 @@ public class GptService {
         MultiChatMessage systemDefinition = getSystemDefinition(SYSTEM_INTENSE);
         List<MultiChatMessage> messages = Arrays.asList(systemDefinition, new MultiChatMessage("user", script));
         String response = chatProxy(messages);
-        if(response==null) return ChatType.SERVER_ERR;
+        if (response == null) return ChatType.SERVER_ERR;
 
         multi.setTopP(originalTopP);
         multi.setTemperature(originalTemperature);
@@ -188,7 +187,7 @@ public class GptService {
         return res;
     }
 
-    public UserInformationGenerateDto generateUserInformation(List<MultiChatMessage> dialog) {
+    public UserInformationGenerateDto generateUserInformation(List<MultiChatMessage> dialog, Long memberId) {
 
         MultiChatProperties multi = chatgptProperties.getMulti();
 
@@ -202,8 +201,13 @@ public class GptService {
 
         Map<String, String> params = new HashMap<>();
         params.put("$currentTime", LocalDateTime.now().toString());
+        String informationString = memberService.getInformationString(memberId);
         String system = setPromptParams(infoSystemScript, params);
         messages.add(new MultiChatMessage("system", system));
+        params = new HashMap<>();
+        params.put("$user-info", informationString);
+        String infoDump = setPromptParams(informationDumpScript, params);
+        messages.add(new MultiChatMessage("user", infoDump));
 
         String response = chatgptService.multiChat(messages);
 

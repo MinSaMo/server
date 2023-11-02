@@ -1,5 +1,6 @@
 package com.konkuk.gp.controller.http;
 
+import com.konkuk.gp.config.DatabaseInitConfiguration;
 import com.konkuk.gp.controller.http.dto.ClientMessageDto;
 import com.konkuk.gp.controller.http.dto.DialogDto;
 import com.konkuk.gp.service.dialog.DialogManager;
@@ -9,10 +10,7 @@ import com.konkuk.gp.controller.http.dto.CaptionDto;
 import com.konkuk.gp.global.exception.NotFoundException;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.WebSocketSession;
 
 @RestController
@@ -23,7 +21,12 @@ public class AdminController {
     private final SessionRegistry sessionRegistry;
 
     private final DialogManager dialogManager;
+    private final DatabaseInitConfiguration configuration;
 
+    @GetMapping("/init")
+    public void init() {
+        configuration.init();
+    }
     @PostMapping("/script")
     public String sendMessageToClient(@RequestBody ClientMessageDto dto) {
         WebSocketSession session = sessionRegistry.getSession(SessionType.CLIENT)
