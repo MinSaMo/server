@@ -42,6 +42,7 @@ public class DialogManager {
     private List<MultiChatMessage> currentHistory;
 
     @Getter
+    @Setter
     private List<MultiChatMessage> gptHistory;
     private Long sequence;
 
@@ -79,6 +80,11 @@ public class DialogManager {
         saveDialogHistory();
         generateUserInformation();
         log.info("[DIALOG] END DIALOG");
+
+        /*
+        Reset GPT Dialog
+         */
+        gptHistory = new ArrayList<>();
     }
 
     public boolean hasDialog() {

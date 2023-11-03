@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Configuration
 @RequiredArgsConstructor
@@ -39,6 +40,10 @@ public class DatabaseInitConfiguration {
                 .build());
         dialogManager.setMemberId(member.getId());
         logProperty.setMemberId(member.getId());
+        /*
+        reset ahnLLM history
+         */
+        dialogManager.setGptHistory(new ArrayList<>());
 
         foodRepository.save(foodRepository.save(PreferredFood.builder()
                 .member(member)
