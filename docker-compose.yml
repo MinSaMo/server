@@ -2,7 +2,7 @@ version: '3'
 
 services:
   database:
-    container_name: mysql_db
+    container_name: daila_mysql
     image: mysql/mysql-server:5.7
     restart: unless-stopped
     env_file:
@@ -17,9 +17,18 @@ services:
       - "--collation-server=utf8mb4_unicode_ci"
     networks:
       - daila_network
-
+  mongodb:
+    container_name: daila_mongo
+    image: mongo
+    restart: always
+    ports:
+      - "27011:27017"
+    env_file:
+      - .env
+    networks:
+      - daila_network
   application:
-    container_name: docker-compose-test
+    container_name: daila_server
     restart: on-failure
     build:
       context: ./
@@ -29,11 +38,13 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_URL: jdbc:mysql://daila_mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@daila_mongo:27017/${MONGO_INITDB_DATABASE}?authSource=admin&retryWrites=true&w=majority
     depends_on:
       - database
+      - mongodb
     networks:
       - daila_network
 
