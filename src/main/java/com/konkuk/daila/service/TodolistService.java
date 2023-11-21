@@ -6,11 +6,12 @@ import com.konkuk.daila.domain.dao.member.Member;
 import com.konkuk.daila.domain.dao.member.MemberTodolist;
 import com.konkuk.daila.domain.dao.member.MemberTodolistRepository;
 import com.konkuk.daila.domain.dto.request.TodolistCreateDto;
-import com.konkuk.daila.global.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,14 +22,12 @@ public class TodolistService {
     private final MemberTodolistRepository memberChecklistRepository;
 
     @Transactional
-    public String completeTodolist(Long checklistId, Member member) {
-        MemberTodolist checklist = member.getChecklistList().stream()
-                .filter(mc -> mc.getChecklist().getId().equals(checklistId))
-                .findFirst()
-                .orElseThrow(() -> NotFoundException.TODOLIST_NOT_FOUND);
+    public String completeTodolist(Long todoListId) {
+        MemberTodolist checklist = memberChecklistRepository.findByTodolistId(todoListId)
+                .orElseThrow(() -> new RuntimeException("Not found todolist"));
         checklist.setComplete();
         log.info("Complete Todolist : {}", checklist);
-        return checklist.getChecklist().getDescription();
+        return checklist.getTodolist().getDescription();
     }
 
     @Transactional
@@ -39,13 +38,20 @@ public class TodolistService {
 
     @Transactional
     public Todolist saveTodolist(TodolistCreateDto dto, Member member) {
-        Todolist checklist = this.saveTodolist(dto);
+        Todolist todolist = this.saveTodolist(dto);
         MemberTodolist memberChecklist = MemberTodolist.builder()
-                .checklist(checklist)
+                .todolist(todolist)
                 .member(member)
                 .build();
         memberChecklistRepository.save(memberChecklist);
-        return checklist;
+        return todolist;
+    }
+
+    @Transactional
+    public List<Todolist> findAllByMemberId(Long memberId) {
+        return memberChecklistRepository.findByMemberId(memberId).stream()
+                .map(MemberTodolist::getTodolist)
+                .toList();
     }
 
     public Todolist toEntity(TodolistCreateDto dto) {

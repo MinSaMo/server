@@ -27,12 +27,12 @@ public class MemberTodolist {
 
     @ManyToOne
     @JoinColumn(name = "mc_checklist_id")
-    private Todolist checklist;
+    private Todolist todolist;
 
     @Builder
-    public MemberTodolist(Member member, Todolist checklist) {
+    public MemberTodolist(Member member, Todolist todolist) {
         this.member = member;
-        this.checklist = checklist;
+        this.todolist = todolist;
         isCompleted = false;
 
         if (!member.getDiseaseList().contains(this)) {
@@ -49,7 +49,7 @@ public class MemberTodolist {
         return "MemberChecklist{" +
                 "id:" + id +
                 ", isCompleted:" + isCompleted +
-                ", checklist=" + checklist +
+                ", checklist=" + todolist +
                 '}';
     }
 }

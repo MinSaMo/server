@@ -9,10 +9,8 @@ import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.global.thread.EmergencyCheckRunner;
 import com.konkuk.daila.global.thread.TodolistCheckRunner;
 import com.konkuk.daila.global.validation.MessageValid;
+import com.konkuk.daila.service.BehaviorService;
 import com.konkuk.daila.service.ChatService;
-import com.konkuk.daila.service.GptService;
-import com.konkuk.daila.service.GptServicev2;
-import com.konkuk.daila.service.PromptManager;
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.TimerStart;
 import com.konkuk.daila.service.enums.ChatType;
@@ -30,11 +28,9 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class MessageController {
 
-    private final GptService gptService;
-    private final GptServicev2 gptServicev2;
     private final ChatService chatService;
-    private final PromptManager promptManager;
-    private final DialogService dialogManager;
+    private final DialogService dialogService;
+    private final BehaviorService behaviorService;
     private final ObjectProvider<EmergencyCheckRunner> emergencyCheckerProvider;
     private final ObjectProvider<TodolistCheckRunner> todolistCheckerProvider;
 
@@ -76,8 +72,8 @@ public class MessageController {
             ClientRequestDto dto
     ) {
         long start = System.currentTimeMillis();
-        Long memberId = dialogManager.getMemberId();
-        Long dialogId = dialogManager.startDialog();
+        Long memberId = dialogService.getMemberId();
+        Long dialogId = dialogService.startDialog();
 
         String script = dto.getScript();
         logger.sendScriptLog(script, memberId, dialogId);
@@ -95,16 +91,8 @@ public class MessageController {
                     .build();
         }
 
-
-        DialogResponseDto reply = gptService.ask(
-                script,
-                chatType,
-                memberId,
-                dialogManager.getCurrentHistory()
-        );
-
+        DialogResponseDto reply = chatService.responseWithDaily(script);
         long time = System.currentTimeMillis() - start;
-        dialogManager.addMessage(script, reply.response());
         logger.sendReplyLog(reply.response());
         return ClientResponseDto.builder()
                 .script(reply.response())
@@ -121,13 +109,12 @@ public class MessageController {
             AiRequestDto dto
     ) {
         long start = System.currentTimeMillis();
-        Long memberId = dialogManager.getMemberId();
-        Long dialogId = dialogManager.startDialog();
+        Long memberId = dialogService.getMemberId();
 
         String caption = dto.getCaption();
         logger.sendCaptionLog(caption, memberId);
 
-        EmergencyCheckDto emergencyResult = gptService.checkEmergency(caption);
+        EmergencyCheckDto emergencyResult = behaviorService.checkEmergency(caption);
         if (emergencyResult.isDetected()) {
             EmergencyCheckRunner emergencyChecker = getEmergencyChecker(caption);
             startBackgroundJob(emergencyChecker);
@@ -138,8 +125,7 @@ public class MessageController {
         startBackgroundJob(todoChecker);
 
         // TODO : 말을 걸지 판단하는 Script 필요함
-        // 현재 구현은 ADVICE 로 내어줌
-        DialogResponseDto response = gptService.ask(caption, ChatType.ADVICE, memberId, dialogManager.getCurrentHistory());
+        DialogResponseDto response = chatService.responseWithDaily(caption);
         long time = System.currentTimeMillis() - start;
         logger.sendCaptionReplyLog(response.response());
         return ClientResponseDto.builder()

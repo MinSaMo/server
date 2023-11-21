@@ -1,4 +1,4 @@
-package com.konkuk.daila.service;
+package com.konkuk.daila.service.dialog;
 
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.TimerEnd;

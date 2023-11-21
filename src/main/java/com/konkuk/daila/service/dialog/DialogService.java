@@ -6,8 +6,7 @@ import com.konkuk.daila.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.daila.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.global.logger.UserInformationLogProperty;
-import com.konkuk.daila.service.GptService;
-import com.konkuk.daila.service.MemberService;
+import com.konkuk.daila.service.*;
 import dev.ai4j.openai4j.chat.ChatCompletionRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +16,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class DialogService {
 
     private final MemberService memberService;
     private final GptService gptService;
+    private final PromptManager promptManager;
     private final DialogHistoryRepository dialogHistoryRepository;
 
     private final UserInformationLogProperty userLogProperty;
@@ -125,8 +128,21 @@ public class DialogService {
      */
     @Transactional
     public void generateUserInformation() {
-        UserInformationGenerateDto information = gptService.generateUserInformation(currentHistory,memberId);
-        memberService.saveInformation(information, memberId);
+
+        Prompt informationPrompt = promptManager.getInfoPrompt();
+
+        Map<String, String> systemParamMap = new HashMap<>();
+        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
+        String systemScript = promptManager.setPromptParams(informationPrompt.getScript(), systemParamMap);
+
+        ChatCompletionRequest request = wrapWithHistory(gptService.request())
+                .addSystemMessage(systemScript)
+                .topP(informationPrompt.getTopP())
+                .temperature(informationPrompt.getTemperature())
+                .build();
+
+        UserInformationGenerateDto response = gptService.ask(request, UserInformationGenerateDto.class);
+        memberService.saveInformation(response, memberId);
         userLogProperty.load();
         logger.sendUserInformationLog();
     }

@@ -40,9 +40,6 @@ public class DatabaseInitConfiguration {
                 .build());
         dialogManager.setMemberId(member.getId());
         logProperty.setMemberId(member.getId());
-        /*
-        reset ahnLLM history
-         */
         dialogManager.setGptHistory(new ArrayList<>());
 
         foodRepository.save(foodRepository.save(PreferredFood.builder()
@@ -54,12 +51,12 @@ public class DatabaseInitConfiguration {
                 .name("일식")
                 .build()));
 
-        Todolist checklist = todolistRepository.save(Todolist.builder()
+        Todolist todolist = todolistRepository.save(Todolist.builder()
                 .description("일곱 난쟁이팀 응원하기")
                 .deadline(LocalDateTime.of(2023, 11, 3, 17, 0))
                 .build());
         memberTodolistRepository.save(MemberTodolist.builder()
-                .checklist(checklist)
+                .todolist(todolist)
                 .member(member)
                 .build());
 

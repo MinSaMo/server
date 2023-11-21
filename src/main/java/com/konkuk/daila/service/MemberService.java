@@ -70,12 +70,6 @@ public class MemberService {
     }
 
     @Transactional
-    public String completeChecklist(Long checklistId, Long memberId) {
-        Member member = findMemberById(memberId);
-        return checklistService.completeTodolist(checklistId, member);
-    }
-
-    @Transactional
     public void addFood(String foodName, Long memberId) {
         Member member = findMemberById(memberId);
         PreferredFood food = PreferredFood.builder()
@@ -100,7 +94,7 @@ public class MemberService {
                 .toList();
 
         List<Todolist> checklist = member.getChecklistList().stream()
-                .map(MemberTodolist::getChecklist)
+                .map(MemberTodolist::getTodolist)
                 .toList();
 
         List<String> foods = member.getFoodList().stream()
