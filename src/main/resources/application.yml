@@ -2,6 +2,8 @@ spring:
   config:
     import:
       - classpath:gpt-script.yml
+      - classpath:openai.properties
+      - classpath:application-db.yml
 
   output:
     ansi:

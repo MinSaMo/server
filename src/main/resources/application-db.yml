@@ -1,0 +1,43 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+---
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  datasource:
+    url: jdbc:mysql://localhost:3307/daila_db
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    mongodb:
+      username: daila
+      password: password
+      host: 127.0.0.1
+      port: 27017
+      database: gp
+---
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+---
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  datasource:
+    driver-class-name:
+    url: jdbc:h2:mem:test_db;MODE=MySQL;
+    username: SA
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database: h2
+
