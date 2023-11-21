@@ -1,6 +1,6 @@
 package com.konkuk.gp.domain.dao.dialog;
 
-import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
+import com.konkuk.gp.service.dialog.Message;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,5 +12,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DialogHistory {
     private Long memberId;
-    private List<MultiChatMessage> chats;
+    private List<Message> chats;
 }

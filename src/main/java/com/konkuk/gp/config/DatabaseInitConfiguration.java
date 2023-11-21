@@ -6,7 +6,7 @@ import com.konkuk.gp.domain.dao.Todolist;
 import com.konkuk.gp.domain.dao.TodolistRepository;
 import com.konkuk.gp.domain.dao.member.*;
 import com.konkuk.gp.global.logger.UserInformationLogProperty;
-import com.konkuk.gp.service.dialog.DialogManager;
+import com.konkuk.gp.service.dialog.DialogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +29,7 @@ public class DatabaseInitConfiguration {
     private final DiseaseRepository diseaseRepository;
     private final MemberDiseaseRepository memberDiseaseRepository;
 
-    private final DialogManager dialogManager;
+    private final DialogService dialogManager;
     private final UserInformationLogProperty logProperty;
 
     @PostConstruct

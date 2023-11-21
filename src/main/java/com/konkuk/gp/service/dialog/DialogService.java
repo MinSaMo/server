@@ -8,7 +8,6 @@ import com.konkuk.gp.global.logger.DashboardLogger;
 import com.konkuk.gp.global.logger.UserInformationLogProperty;
 import com.konkuk.gp.service.GptService;
 import com.konkuk.gp.service.MemberService;
-import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -23,7 +22,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DialogManager {
+public class DialogService {
 
     private final MemberService memberService;
     private final GptService gptService;
@@ -39,11 +38,11 @@ public class DialogManager {
     @Setter
     private Long memberId;
     @Getter
-    private List<MultiChatMessage> currentHistory;
+    private List<Message> currentHistory;
 
     @Getter
     @Setter
-    private List<MultiChatMessage> gptHistory;
+    private List<Message> gptHistory;
     private Long sequence;
 
     @PostConstruct
@@ -57,7 +56,7 @@ public class DialogManager {
         gptHistory = new ArrayList<>();
     }
 
-    public void addChatToGpt(MultiChatMessage message) {
+    public void addChatToGpt(Message message) {
         gptHistory.add(message);
     }
 
@@ -91,7 +90,7 @@ public class DialogManager {
         return isRun;
     }
 
-    public int addMessage(List<MultiChatMessage> chatMessages) {
+    public int addMessage(List<Message> chatMessages) {
         if (!isRun) return -1;
         this.currentHistory.addAll(chatMessages);
 //        chatLoggerHandler.sendLog(currentHistory);
@@ -99,16 +98,14 @@ public class DialogManager {
     }
     public int addMessage(String user, String assistant) {
         if (!isRun) return -1;
-        this.currentHistory.add(new MultiChatMessage("user", user));
-        this.currentHistory.add(new MultiChatMessage("assistant",assistant));
-//        chatLoggerHandler.sendLog(currentHistory);
+        this.currentHistory.add(Message.ofUser(user));
+        this.currentHistory.add(Message.ofAssistant(assistant));
         return Math.toIntExact(sequence++);
     }
 
-    public int addMessage(MultiChatMessage chatMessages) {
+    public int addMessage(Message chatMessages) {
         if (!isRun) return -1;
         this.currentHistory.add(chatMessages);
-//        chatLoggerHandler.sendLog(currentHistory);
         return Math.toIntExact(sequence);
     }
 
