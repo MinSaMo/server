@@ -12,7 +12,6 @@ import com.konkuk.daila.global.validation.MessageValid;
 import com.konkuk.daila.service.BehaviorService;
 import com.konkuk.daila.service.ChatService;
 import com.konkuk.daila.service.dialog.DialogService;
-import com.konkuk.daila.service.dialog.TimerStart;
 import com.konkuk.daila.service.enums.ChatType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +65,6 @@ public class MessageController {
 
     @MessageMapping("/script")
     @SendTo("/topic/service/reply")
-    @TimerStart
     @MessageValid
     public ClientResponseDto dialogWithScript(
             ClientRequestDto dto

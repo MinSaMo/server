@@ -141,7 +141,7 @@ public class DialogService {
                 .temperature(informationPrompt.getTemperature())
                 .build();
 
-        UserInformationGenerateDto response = gptService.ask(request, UserInformationGenerateDto.class);
+        UserInformationGenerateDto response = gptService.askToSub(request, UserInformationGenerateDto.class);
         memberService.saveInformation(response, memberId);
         userLogProperty.load();
         logger.sendUserInformationLog();

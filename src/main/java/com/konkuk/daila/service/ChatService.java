@@ -1,6 +1,7 @@
 package com.konkuk.daila.service;
 
 import com.konkuk.daila.domain.dto.response.DialogResponseDto;
+import com.konkuk.daila.domain.dto.response.IntenseResponseDto;
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.Message;
 import com.konkuk.daila.service.enums.ChatType;
@@ -40,9 +41,9 @@ public class ChatService {
                 .topP(intensePrompt.getTopP())
                 .temperature(intensePrompt.getTemperature())
                 .build();
-        return gptService.ask(intenseRequest, ChatType.class);
+        IntenseResponseDto response = gptService.ask(intenseRequest, IntenseResponseDto.class);
+        return ChatType.of(response.answerTypeIndex());
     }
-
     // response with daily
     public DialogResponseDto responseWithDaily(String script) {
         Long memberId = dialogService.getMemberId();
