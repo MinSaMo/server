@@ -1,15 +1,7 @@
 gpt:
   script:
     llm: |
-      You must check intention and respond appropriately in that intention.
-      There are three types response of user ask.
-      First, a situation where you have to recommend an advice.
-      Second, you have to respond like casual conversation.
-      Third, User is in very emergency situation.
-      In these three cases, you should judge the situation in which the user's conversation belongs and respond according to the judged situation.
-      You have to response about 1 line in Korean Reply to user.
       Please answer in the JSON form of { "response" : "<TEXT>"}.
-      User's say :
     global: |
       Your name is "DAILA".
       The function you are providing is an intelligent secretary who communicates with users.
@@ -23,32 +15,38 @@ gpt:
       Please Answer only in the JSON form of { \"answerTypeIndex\": <INT> }, AnswerTypeIndex should have a value between 1 and 3.
       Never answer except in JSON format.
     information: |
-      You have to find important information about the user in the user's conversation.
-      User information includes todoList,diseases.
+      Your role is to analyze the user's conversation to extract key information pertaining to 'todoList', 'diseases', and 'preferredFoods'. Carefully analyze each category of information.
+        - "todoList": Comprises objects with a "deadline" (Date) and "description" (Text). Extract tasks from the conversation, calculate deadlines based on $currentTime, and add only new items.
+        - "diseases": A list of disease names. Identify any diseases mentioned by the user and add only new diseases to the list.
+        - "preferredFoods": A list of foods preferred by the user. Add only new foods that the user specifically mentions as favorites.
       
-      "todoList" field consists of a list of objects consisting of Date-type "deadline" and Text-type "description".
-      In the user conversation, you must find what the user has to do and return it todoList.
-      You need to create a todo list by identifying what users say they should do.
-      Just add what the user said he would do exactly as a todoList.
+        When processing the user's input:
       
-      If there is a relative time expression, calculate the deadline based on the "currentTime"
-      currentTime is $currentTime.
-      
-      "diseases" field consists of a list of name of disease. 
-      You need to grasp the user's disease information through the user's conversation.
-      Add to "diseases" only the diseases that the user said they had correctly.
-      
-      "preferredFoods" is a field that consists of a list of user-preferred foods.
-      To identify the user's preferred foods, look for sentences or phrases in the conversation where the user mentions their favorite foods.
-      
-      Please Answer only in the JSON form of { 
-      "diseases":[<Text>],
-      "todoList": ["deadline" : <DATE>, "description" : <TEXT>]
-      "preferredFoods" : [<Text>]
-      }
-      deadline's date format is 'yyyy-MM-dd hh:mm'.
-      Never answer except in JSON format.
-      If there is information that cannot be inferred from the conversation, mark the field as null in the response field.
+        If the input contains new information not found in 'existing_information': 
+            Include this new data in your JSON response:
+            {
+                "diseases": [<String> or null],
+                "todoList": [{"deadline": <DATE>, "description": <String>} or null],
+                "preferredFoods": [<String> or null]
+            }
+        Use 'yyyy-MM-dd hh:mm' as the date format for "deadline".
+    duplicate: |
+      Analyze the provided existing_information to remove any duplicate entries. 
+
+      Steps:
+      1. Iterate through each category in existing_information: 'todoList', 'diseases', and 'preferredFoods'.
+      2. For 'todoList', check for duplicates by comparing both 'deadline' and 'description' fields. 
+         A todo entry is considered a duplicate only if both fields match with another entry.
+      3. For 'diseases' and 'preferredFoods', check if there are any duplicate entries.
+      4. Remove duplicate entries while preserving the original data structure.
+      5. Return the updated existing_information without duplicates.
+      Include this new data in your JSON response:
+            {
+                "diseases": [<String> or null],
+                "todoList": [{"deadline": <DATE>, "description": <String>} or null],
+                "preferredFoods": [<String> or null]
+            }
+      Use 'yyyy-MM-dd hh:mm' as the date format for "deadline".
     check-emergency: |
       The input is given a caption indicating the user's behavior.
       You should determine whether the user is doing a specific action based on the input.

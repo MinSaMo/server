@@ -1,5 +1,6 @@
 package com.konkuk.daila.global.logger;
 
+import com.konkuk.daila.controller.stomp.dto.client.ClientResponseDto;
 import com.konkuk.daila.global.logger.message.user.ChatLog;
 import com.konkuk.daila.service.enums.ChatType;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class DashboardLogger {
     private AiLogProperty aiLogProperty;
 
     public void sendUserInformationLog() {
+        userInformationLogProperty.load();
         template.convertAndSend(TopicType.LOG_DB_USERINFO.getPath(), userInformationLogProperty.getUserInformationLog());
     }
 
@@ -79,6 +81,14 @@ public class DashboardLogger {
         clientLogProperty.setUuid(UUID.randomUUID());
         template.convertAndSend(TopicType.LOG_CLIENT_SCRIPT.getPath(), clientLogProperty.getScriptLogMessage());
         template.convertAndSend(TopicType.LOG_CHAT.getPath(), new ChatLog(ChatLog.SENDER_USER, script));
+        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(),
+                ClientResponseDto.ofUser(script)
+        );
+    }
+
+    public void sendScriptLogForGpt(String script) {
+        template.convertAndSend("/topic/service/gpt",
+                ClientResponseDto.ofUser(script));
     }
 
     public void sendIntenseLog(ChatType intense) {

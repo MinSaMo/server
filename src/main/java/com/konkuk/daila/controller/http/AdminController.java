@@ -10,6 +10,7 @@ import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.Message;
 import com.konkuk.daila.service.enums.SessionType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -20,7 +21,7 @@ public class AdminController {
 
     private final SessionRegistry sessionRegistry;
 
-    private final DialogService dialogManager;
+    private final DialogService dialogService;
     private final DatabaseInitConfiguration configuration;
 
     @GetMapping("/init")
@@ -31,18 +32,24 @@ public class AdminController {
     public String sendMessageToClient(@RequestBody ClientMessageDto dto) {
         WebSocketSession session = sessionRegistry.getSession(SessionType.CLIENT)
                 .orElseThrow(() -> NotFoundException.CLIENT_SESSION_NOT_EXIST);
-        dialogManager.addMessage(Message.ofAssistant(dto.script()));
-        dialogManager.saveDialogHistory();
+        dialogService.addMessage(Message.ofAssistant(dto.script()));
+        dialogService.saveDialogHistory();
         return "OK";
     }
 
     @PostMapping("/dialog")
     public String sendDialog(@RequestBody DialogDto dto) {
-        if (!dialogManager.hasDialog()) {
-            dialogManager.startDialog();
+        if (!dialogService.hasDialog()) {
+            dialogService.startDialog();
         }
-        dialogManager.addMessage(Message.ofUser(dto.script()));
+        dialogService.addMessage(Message.ofUser(dto.script()));
         return "OK";
+    }
+
+    @GetMapping("/dialog_end")
+    public ResponseEntity endDialog() {
+        dialogService.endDialog();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/caption")

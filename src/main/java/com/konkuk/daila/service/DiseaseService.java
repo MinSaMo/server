@@ -25,8 +25,11 @@ public class DiseaseService {
 
     @Transactional
     public Disease saveDisease(DiseaseCreateDto dto, Member member) {
-        Disease disease = saveDisease(dto);
 
+        if (memberDiseaseRepository.existsByDiseaseNameAndMemberId(dto.name(), member.getId())) {
+            return null;
+        }
+        Disease disease = saveDisease(dto);
         MemberDisease memberDisease = MemberDisease.builder()
                 .member(member)
                 .disease(disease)

@@ -5,8 +5,10 @@ import com.konkuk.daila.domain.dao.dialog.DialogHistoryRepository;
 import com.konkuk.daila.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.daila.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
-import com.konkuk.daila.global.logger.UserInformationLogProperty;
-import com.konkuk.daila.service.*;
+import com.konkuk.daila.service.GptService;
+import com.konkuk.daila.service.MemberService;
+import com.konkuk.daila.service.Prompt;
+import com.konkuk.daila.service.PromptManager;
 import dev.ai4j.openai4j.chat.ChatCompletionRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +31,6 @@ public class DialogService {
     private final PromptManager promptManager;
     private final DialogHistoryRepository dialogHistoryRepository;
 
-    private final UserInformationLogProperty userLogProperty;
     private final DashboardLogger logger;
 
     private boolean isRun;
@@ -81,12 +79,8 @@ public class DialogService {
         isRun = false;
         saveDialogHistory();
         generateUserInformation();
-        log.info("[DIALOG] END DIALOG");
-
-        /*
-        Reset GPT Dialog
-         */
         gptHistory = new ArrayList<>();
+        log.info("[DIALOG] END DIALOG");
     }
 
     public boolean hasDialog() {
@@ -99,6 +93,7 @@ public class DialogService {
 //        chatLoggerHandler.sendLog(currentHistory);
         return Math.toIntExact(sequence++);
     }
+
     public int addMessage(String user, String assistant) {
         if (!isRun) return -1;
         this.currentHistory.add(Message.ofUser(user));
@@ -130,20 +125,30 @@ public class DialogService {
     public void generateUserInformation() {
 
         Prompt informationPrompt = promptManager.getInfoPrompt();
+        Prompt duplicatePrompt = promptManager.getDuplicatePrompt();
 
-        Map<String, String> systemParamMap = new HashMap<>();
-        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
-        String systemScript = promptManager.setPromptParams(informationPrompt.getScript(), systemParamMap);
+//        Map<String, String> systemParamMap = new HashMap<>();
+//        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
+//        String systemScript = promptManager.setPromptParams(informationPrompt.getScript());
 
         ChatCompletionRequest request = wrapWithHistory(gptService.request())
-                .addSystemMessage(systemScript)
+                .addSystemMessage(informationPrompt.getScript())
                 .topP(informationPrompt.getTopP())
                 .temperature(informationPrompt.getTemperature())
                 .build();
 
-        UserInformationGenerateDto response = gptService.ask(request, UserInformationGenerateDto.class);
+        UserInformationGenerateDto response = gptService.askToSub(request, UserInformationGenerateDto.class);
+        String duplicatedString = memberService.generateRawInformationString(response, memberId);
+
+        request = gptService.request()
+                .addSystemMessage(duplicatePrompt.getScript())
+                .topP(duplicatePrompt.getTopP())
+                .temperature(duplicatePrompt.getTemperature())
+                .addUserMessage(duplicatedString)
+                .build();
+
+        response = gptService.askToSub(request, UserInformationGenerateDto.class);
         memberService.saveInformation(response, memberId);
-        userLogProperty.load();
         logger.sendUserInformationLog();
     }
 
@@ -152,7 +157,19 @@ public class DialogService {
             String script = msg.getScript();
             if (msg.isUserMessage()) {
                 builder.addUserMessage(script);
-            } else if(msg.isAssistantMessage()) {
+            } else if (msg.isAssistantMessage()) {
+                builder.addAssistantMessage(script);
+            }
+        }
+        return builder;
+    }
+
+    public ChatCompletionRequest.Builder wrapWithLLMHistory(ChatCompletionRequest.Builder builder) {
+        for (Message msg : gptHistory) {
+            String script = msg.getScript();
+            if (msg.isUserMessage()) {
+                builder.addUserMessage(script);
+            } else if (msg.isAssistantMessage()) {
                 builder.addAssistantMessage(script);
             }
         }

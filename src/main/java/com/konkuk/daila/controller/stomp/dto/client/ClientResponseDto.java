@@ -5,23 +5,38 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientResponseDto {
+    public final static String SENDER_USER = "user";
+    public final static String SENDER_ASSISTANT = "assistant";
+
     private String script;
-    // TODO : enum
-    private String type;
-    private Long dialogId;
+    private String sender;
     private String responseTime;
+    private LocalDateTime timestamp;
 
     @Builder
-    public ClientResponseDto(String script, String type, Long dialogId, Long time) {
+    public ClientResponseDto(String script, Long time) {
         this.script = script;
-        this.type = type;
-        this.dialogId = dialogId;
-        double seconds = (double) time / 1000.0;
-        String formattedSeconds = String.format("%.2f", seconds);
-        this.responseTime = formattedSeconds + "s";
+        if (time != null) {
+            double seconds = (double) time / 1000.0;
+            String formattedSeconds = String.format("%.2f", seconds);
+            this.responseTime = formattedSeconds + "s";
+        }
+        this.timestamp = LocalDateTime.now();
+        this.sender = SENDER_ASSISTANT;
     }
+
+    public static ClientResponseDto ofUser(String script) {
+        ClientResponseDto response = ClientResponseDto.builder()
+                .script(script)
+                .build();
+        response.setSender(SENDER_USER);
+        return response;
+    }
+
 }

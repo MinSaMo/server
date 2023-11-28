@@ -5,5 +5,4 @@ import lombok.*;
 @Data
 public class ClientRequestDto {
     private String script;
-    private Boolean isReal;
 }

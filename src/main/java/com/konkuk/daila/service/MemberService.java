@@ -1,6 +1,5 @@
 package com.konkuk.daila.service;
 
-import com.konkuk.daila.domain.dao.Disease;
 import com.konkuk.daila.domain.dao.Todolist;
 import com.konkuk.daila.domain.dao.member.*;
 import com.konkuk.daila.domain.dto.request.DiseaseCreateDto;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -23,6 +23,54 @@ public class MemberService {
     private final DiseaseService diseaseService;
     private final TodolistService checklistService;
     private final PreferredFoodRepository preferredFoodRepository;
+
+    @Transactional
+    public String generateRawInformationString(UserInformationGenerateDto dto, Long memberId) {
+        Member member = findMemberById(memberId);
+
+        List<String> diseaseList = member.getDiseaseList().stream()
+                .map(ds -> ds.getDisease().getName())
+                .toList();
+
+        List<Todolist> checklist = member.getChecklistList().stream()
+                .map(MemberTodolist::getTodolist)
+                .toList();
+
+        List<String> foods = member.getFoodList().stream()
+                .map(PreferredFood::getName)
+                .toList();
+
+        if (dto.diseases() != null) {
+            diseaseList = Stream.concat(
+                            diseaseList.stream(),
+                            dto.diseases().stream())
+                    .toList();
+        }
+
+        if (dto.todoList() != null) {
+            List<Todolist> todoList = dto.todoList().stream()
+                    .map(td -> Todolist.builder()
+                            .description(td.description())
+                            .deadline(td.deadline())
+                            .build())
+                    .toList();
+            checklist = Stream.concat(
+                            checklist.stream(),
+                            todoList.stream())
+                    .toList();
+        }
+
+        if (dto.preferredFoods() != null) {
+            foods = Stream.concat(
+                            foods.stream(),
+                            dto.preferredFoods().stream())
+                    .toList();
+        }
+
+        UserInformationResponseDto information = new UserInformationResponseDto(diseaseList, checklist, foods);
+
+        return informationToString(information);
+    }
 
     @Transactional
     public void saveInformation(UserInformationGenerateDto dto, Long memberId) {
@@ -45,16 +93,16 @@ public class MemberService {
         }
 
         if (preferredFoods != null) {
-        preferredFoods.forEach(
-                pf -> addFood(pf, memberId)
-        );
+            preferredFoods.forEach(
+                    pf -> addFood(pf, memberId)
+            );
         }
     }
 
     @Transactional
     public void addDisease(DiseaseCreateDto dto, Long memberId) {
         Member member = findMemberById(memberId);
-        Disease disease = diseaseService.saveDisease(dto, member);
+        diseaseService.saveDisease(dto, member);
     }
 
     @Transactional
@@ -66,7 +114,7 @@ public class MemberService {
     @Transactional
     public void addChecklist(TodolistCreateDto dto, Long memberId) {
         Member member = findMemberById(memberId);
-        Todolist checklist = checklistService.saveTodolist(dto, member);
+        checklistService.saveTodolist(dto, member);
     }
 
     @Transactional
@@ -76,7 +124,9 @@ public class MemberService {
                 .name(foodName)
                 .member(member)
                 .build();
-        preferredFoodRepository.save(food);
+        if (!preferredFoodRepository.existsByNameAndMemberId(foodName, memberId)) {
+            preferredFoodRepository.save(food);
+        }
     }
 
     @Transactional

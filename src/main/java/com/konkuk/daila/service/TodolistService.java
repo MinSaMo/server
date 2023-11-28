@@ -38,6 +38,9 @@ public class TodolistService {
 
     @Transactional
     public Todolist saveTodolist(TodolistCreateDto dto, Member member) {
+        if (memberChecklistRepository.existsByTodolistDescriptionAndMemberId(dto.description(), member.getId())) {
+            return null;
+        }
         Todolist todolist = this.saveTodolist(dto);
         MemberTodolist memberChecklist = MemberTodolist.builder()
                 .todolist(todolist)

@@ -4,7 +4,6 @@ import com.konkuk.daila.controller.stomp.dto.client.ClientEmergencyCheckDto;
 import com.konkuk.daila.controller.stomp.dto.client.ClientResponseDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.global.logger.TopicType;
-import com.konkuk.daila.service.enums.ChatType;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
@@ -60,8 +59,6 @@ public class EmergencyCheckRunner implements Runnable {
         ClientResponseDto dto = ClientResponseDto.builder()
                 .script("응급상황인가요?")
                 .time(0L)
-                .type(ChatType.EMERGENCY.getName())
-                .dialogId(-1L)
                 .build();
         logger.sendEmergencyCheckLog();
         template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
@@ -71,8 +68,6 @@ public class EmergencyCheckRunner implements Runnable {
         ClientResponseDto dto = ClientResponseDto.builder()
                 .script("응급상황 조치 실행")
                 .time(0L)
-                .type(ChatType.EMERGENCY.getName())
-                .dialogId(-1L)
                 .build();
         logger.sendEmergencyOccurLog();
         template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
