@@ -36,9 +36,9 @@ public class MessageController {
     private final DashboardLogger logger;
 
     @MessageMapping("/gpt")
-    @SendTo("/topic/service/reply_gpt")
+    @SendTo("/topic/service/gpt")
     public ClientResponseDto dialogWithLLM(
-            ClientResponseDto dto
+            ClientRequestDto dto
     ) {
         long start = System.currentTimeMillis();
         String script = dto.getScript();
@@ -56,15 +56,13 @@ public class MessageController {
             }
         }
         return ClientResponseDto.builder()
-                .type(ChatType.LLM.getName())
-                .dialogId(-1L)
                 .script(response)
                 .time(time)
                 .build();
     }
 
-    @MessageMapping("/script")
-    @SendTo("/topic/service/reply")
+    @MessageMapping("/chat")
+    @SendTo("/topic/service/chat")
     @MessageValid
     public ClientResponseDto dialogWithScript(
             ClientRequestDto dto
@@ -83,8 +81,6 @@ public class MessageController {
             long time = System.currentTimeMillis() - start;
             return ClientResponseDto.builder()
                     .script("Sorry, Server Error on Remote GPT. Please resend message.")
-                    .dialogId(dialogId)
-                    .type(chatType.getName())
                     .time(time)
                     .build();
         }
@@ -94,15 +90,13 @@ public class MessageController {
         logger.sendReplyLog(reply.response());
         return ClientResponseDto.builder()
                 .script(reply.response())
-                .dialogId(dialogId)
-                .type(chatType.getName())
                 .time(time)
                 .build();
     }
 
     @MessageValid
     @MessageMapping("/caption")
-    @SendTo(value = "/topic/service/reply")
+    @SendTo(value = "/topic/service/chat")
     public ClientResponseDto dialogWithCaption(
             AiRequestDto dto
     ) {
@@ -128,8 +122,6 @@ public class MessageController {
         logger.sendCaptionReplyLog(response.response());
         return ClientResponseDto.builder()
                 .script(response.response())
-                .dialogId(-1L)
-                .type(ChatType.ADVICE.getName())
                 .time(time)
                 .build();
     }
