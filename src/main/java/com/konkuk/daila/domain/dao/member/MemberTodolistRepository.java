@@ -9,4 +9,6 @@ public interface MemberTodolistRepository extends JpaRepository<MemberTodolist, 
     List<MemberTodolist> findByMemberId(Long memberId);
 
     Optional<MemberTodolist> findByTodolistId(Long todolistId);
+
+    boolean existsByTodolistDescriptionAndMemberId(String todolistDescription, Long memberId);
 }

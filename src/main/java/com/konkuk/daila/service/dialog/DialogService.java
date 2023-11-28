@@ -18,11 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -96,6 +93,7 @@ public class DialogService {
 //        chatLoggerHandler.sendLog(currentHistory);
         return Math.toIntExact(sequence++);
     }
+
     public int addMessage(String user, String assistant) {
         if (!isRun) return -1;
         this.currentHistory.add(Message.ofUser(user));
@@ -127,18 +125,29 @@ public class DialogService {
     public void generateUserInformation() {
 
         Prompt informationPrompt = promptManager.getInfoPrompt();
+        Prompt duplicatePrompt = promptManager.getDuplicatePrompt();
 
-        Map<String, String> systemParamMap = new HashMap<>();
-        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
-        String systemScript = promptManager.setPromptParams(informationPrompt.getScript(), systemParamMap);
+//        Map<String, String> systemParamMap = new HashMap<>();
+//        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
+//        String systemScript = promptManager.setPromptParams(informationPrompt.getScript());
 
         ChatCompletionRequest request = wrapWithHistory(gptService.request())
-                .addSystemMessage(systemScript)
+                .addSystemMessage(informationPrompt.getScript())
                 .topP(informationPrompt.getTopP())
                 .temperature(informationPrompt.getTemperature())
                 .build();
 
         UserInformationGenerateDto response = gptService.askToSub(request, UserInformationGenerateDto.class);
+        String duplicatedString = memberService.generateRawInformationString(response, memberId);
+
+        request = gptService.request()
+                .addSystemMessage(duplicatePrompt.getScript())
+                .topP(duplicatePrompt.getTopP())
+                .temperature(duplicatePrompt.getTemperature())
+                .addUserMessage(duplicatedString)
+                .build();
+
+        response = gptService.askToSub(request, UserInformationGenerateDto.class);
         memberService.saveInformation(response, memberId);
         logger.sendUserInformationLog();
     }
@@ -148,18 +157,19 @@ public class DialogService {
             String script = msg.getScript();
             if (msg.isUserMessage()) {
                 builder.addUserMessage(script);
-            } else if(msg.isAssistantMessage()) {
+            } else if (msg.isAssistantMessage()) {
                 builder.addAssistantMessage(script);
             }
         }
         return builder;
     }
+
     public ChatCompletionRequest.Builder wrapWithLLMHistory(ChatCompletionRequest.Builder builder) {
         for (Message msg : gptHistory) {
             String script = msg.getScript();
             if (msg.isUserMessage()) {
                 builder.addUserMessage(script);
-            } else if(msg.isAssistantMessage()) {
+            } else if (msg.isAssistantMessage()) {
                 builder.addAssistantMessage(script);
             }
         }
