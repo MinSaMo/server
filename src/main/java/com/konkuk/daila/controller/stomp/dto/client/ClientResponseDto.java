@@ -22,17 +22,18 @@ public class ClientResponseDto {
     @Builder
     public ClientResponseDto(String script, Long time) {
         this.script = script;
-        double seconds = (double) time / 1000.0;
-        String formattedSeconds = String.format("%.2f", seconds);
-        this.responseTime = formattedSeconds + "s";
+        if (time != null) {
+            double seconds = (double) time / 1000.0;
+            String formattedSeconds = String.format("%.2f", seconds);
+            this.responseTime = formattedSeconds + "s";
+        }
         this.timestamp = LocalDateTime.now();
         this.sender = SENDER_ASSISTANT;
     }
 
-    public static ClientResponseDto ofUser(String script, Long time) {
+    public static ClientResponseDto ofUser(String script) {
         ClientResponseDto response = ClientResponseDto.builder()
                 .script(script)
-                .time(time)
                 .build();
         response.setSender(SENDER_USER);
         return response;

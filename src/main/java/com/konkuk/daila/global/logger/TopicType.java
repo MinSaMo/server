@@ -5,13 +5,13 @@ import lombok.Getter;
 @Getter
 public enum TopicType {
     // For Service
-    SERVICE_REPLY("/topic/service/reply"),
+    SERVICE_REPLY("/topic/service/chat"),
     SERVICE_EMERGENCY("/topic/service/emerge"),
 
     // For Client Log
     LOG_CLIENT_SCRIPT("/topic/log/client/script"),
-    LOG_CLIENT_INTENSE("/topic/log/client/intense"),
-    LOG_CLIENT_PROMPT("/topic/log/client/prompt"),
+    LOG_CLIENT_INTENSE("/topic/classify"),
+    LOG_CLIENT_PROMPT("/topic/prompt"),
     LOG_CLIENT_REPLY("/topic/log/client/reply"),
 
     // For AI Log
@@ -23,7 +23,7 @@ public enum TopicType {
     LOG_AI_REPLY("/topic/log/ai/reply"),
 
     // For DB Log
-    LOG_DB_USERINFO("/topic/log/user/information"),
+    LOG_DB_USERINFO("/topic/information"),
     LOG_CHAT("/topic/log/chat")
     ;
 

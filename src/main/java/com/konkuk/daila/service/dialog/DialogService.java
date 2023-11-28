@@ -143,7 +143,6 @@ public class DialogService {
 
         UserInformationGenerateDto response = gptService.askToSub(request, UserInformationGenerateDto.class);
         memberService.saveInformation(response, memberId);
-        userLogProperty.load();
         logger.sendUserInformationLog();
     }
 

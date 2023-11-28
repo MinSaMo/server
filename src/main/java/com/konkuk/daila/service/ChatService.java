@@ -2,6 +2,7 @@ package com.konkuk.daila.service;
 
 import com.konkuk.daila.domain.dto.response.DialogResponseDto;
 import com.konkuk.daila.domain.dto.response.IntenseResponseDto;
+import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.Message;
 import com.konkuk.daila.service.enums.ChatType;
@@ -22,6 +23,7 @@ public class ChatService {
     private final GptService gptService;
     private final DialogService dialogService;
     private final MemberService memberService;
+    private final DashboardLogger logger;
 
     // response with LLM
     public String responseWithLLM(String script) {
@@ -54,6 +56,8 @@ public class ChatService {
         paramMap.put("$userInformation", memberService.getInformationString(memberId));
 
         String prompt = promptManager.setPromptParams(dailyPrompt.getScript(), paramMap);
+        logger.sendPromptLog(prompt);
+
         ChatCompletionRequest request = dialogService.wrapWithHistory(gptService.request())
                 .addSystemMessage(prompt)
                 .topP(dailyPrompt.getTopP())

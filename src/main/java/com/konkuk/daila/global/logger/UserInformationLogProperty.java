@@ -74,7 +74,6 @@ public class UserInformationLogProperty {
 
     public Map<String, Object> getUserInformationLog() {
         HashMap<String, Object> res = new HashMap<>();
-        res.put("memberId", memberId);
         res.put("diseases", diseaseLogs);
         res.put("foods", foodLogs);
         res.put("todos", todoLogs);

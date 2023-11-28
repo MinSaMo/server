@@ -28,14 +28,14 @@ public class ClientLogProperty implements ClientLog {
     public Map<String, Object> getIntenseLogMessage() {
         Map<String, Object> res = this.base();
         res.put("script", script);
-        res.put("intense", intense.getName());
+        res.put("classification", intense.getName());
         return res;
     }
 
     @Override
     public Map<String, Object> getPromptLogMessage() {
         Map<String, Object> res = this.base();
-        res.put("intense", intense.getName());
+        res.put("script", script);
         res.put("prompt", prompt);
         return res;
     }

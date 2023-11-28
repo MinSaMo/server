@@ -42,6 +42,8 @@ public class MessageController {
     ) {
         long start = System.currentTimeMillis();
         String script = dto.getScript();
+        logger.sendScriptLogForGpt(script);
+
         String response = chatService.responseWithLLM(script);
         long time = System.currentTimeMillis() - start;
         if (time <= 10000) {
@@ -124,11 +126,6 @@ public class MessageController {
                 .script(response.response())
                 .time(time)
                 .build();
-    }
-
-    @MessageMapping("/user-info")
-    public void sendUserInformation() {
-        logger.sendUserInformationLog();
     }
 
     private void startBackgroundJob(Runnable runnable) {
