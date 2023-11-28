@@ -5,8 +5,10 @@ import com.konkuk.daila.domain.dao.dialog.DialogHistoryRepository;
 import com.konkuk.daila.domain.dto.request.UserInformationGenerateDto;
 import com.konkuk.daila.domain.dto.response.UserInformationResponseDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
-import com.konkuk.daila.global.logger.UserInformationLogProperty;
-import com.konkuk.daila.service.*;
+import com.konkuk.daila.service.GptService;
+import com.konkuk.daila.service.MemberService;
+import com.konkuk.daila.service.Prompt;
+import com.konkuk.daila.service.PromptManager;
 import dev.ai4j.openai4j.chat.ChatCompletionRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +34,6 @@ public class DialogService {
     private final PromptManager promptManager;
     private final DialogHistoryRepository dialogHistoryRepository;
 
-    private final UserInformationLogProperty userLogProperty;
     private final DashboardLogger logger;
 
     private boolean isRun;
@@ -81,12 +82,8 @@ public class DialogService {
         isRun = false;
         saveDialogHistory();
         generateUserInformation();
-        log.info("[DIALOG] END DIALOG");
-
-        /*
-        Reset GPT Dialog
-         */
         gptHistory = new ArrayList<>();
+        log.info("[DIALOG] END DIALOG");
     }
 
     public boolean hasDialog() {
@@ -148,6 +145,17 @@ public class DialogService {
 
     public ChatCompletionRequest.Builder wrapWithHistory(ChatCompletionRequest.Builder builder) {
         for (Message msg : currentHistory) {
+            String script = msg.getScript();
+            if (msg.isUserMessage()) {
+                builder.addUserMessage(script);
+            } else if(msg.isAssistantMessage()) {
+                builder.addAssistantMessage(script);
+            }
+        }
+        return builder;
+    }
+    public ChatCompletionRequest.Builder wrapWithLLMHistory(ChatCompletionRequest.Builder builder) {
+        for (Message msg : gptHistory) {
             String script = msg.getScript();
             if (msg.isUserMessage()) {
                 builder.addUserMessage(script);

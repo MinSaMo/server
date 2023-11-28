@@ -28,10 +28,11 @@ public class ChatService {
     // response with LLM
     public String responseWithLLM(String script) {
         dialogService.addChatToGpt(Message.ofUser(script));
-        ChatCompletionRequest request = dialogService.wrapWithHistory(gptService.request())
-                .addSystemMessage(promptManager.getNormalLLMPrompt().getScript())
+        ChatCompletionRequest request = dialogService.wrapWithLLMHistory(gptService.request()
+                        .addSystemMessage(promptManager.getNormalLLMPrompt().getScript()))
                 .build();
         DialogResponseDto result = gptService.askToSub(request, DialogResponseDto.class);
+        dialogService.addChatToGpt(Message.ofAssistant(result.response()));
         return result.response();
     }
 
@@ -46,6 +47,7 @@ public class ChatService {
         IntenseResponseDto response = gptService.ask(intenseRequest, IntenseResponseDto.class);
         return ChatType.of(response.answerTypeIndex());
     }
+
     // response with daily
     public DialogResponseDto responseWithDaily(String script) {
         Long memberId = dialogService.getMemberId();
