@@ -63,6 +63,23 @@ gpt:
       Check the description of the checklist and return the id of the checklist completed by the user in the complete field.
       Return is {"complete": [<INT>]} It should be done in form.
       If there is no user action that matches the checklist, return Null.
+    check-response: |
+      Analyze the provided user caption to determine the appropriate response.
+
+                  Steps:
+                  1. Determine the nature of the caption to decide whether to use 'daily' or 'advice' context:
+                      - If the caption is about general observations, thoughts, or casual conversation, use the 'daily' context.
+                      - If the caption suggests a need for specific guidance, suggestions, or advice, use the 'advice' context.
+                  2. Generate the response accordingly and format it in JSON, with 'type' indicating the context used, and 'response' containing the actual response.
+
+                  Example JSON response structure:
+                  {
+                      "type": "daily" or "advice" or null (if no conversation is needed),
+                      "response": <Response from the chosen context or null if no conversation is needed,
+                                    response must be 1 line in korean>
+                  }
+
+      Ensure the responses are relevant and adhere to this structured format.
     daily: |
       User information for the current conversation: $userInformation
       User Talk or Action: $message

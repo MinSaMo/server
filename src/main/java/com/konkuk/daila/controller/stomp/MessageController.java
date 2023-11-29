@@ -20,6 +20,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
+import java.util.Optional;
 import java.util.Random;
 
 @Controller
@@ -118,14 +119,17 @@ public class MessageController {
         TodolistCheckRunner todoChecker = getTodoChecker(caption, memberId);
         startBackgroundJob(todoChecker);
 
-        // TODO : 말을 걸지 판단하는 Script 필요함
-        DialogResponseDto response = chatService.responseWithDaily(caption);
-        long time = System.currentTimeMillis() - start;
-        logger.sendCaptionReplyLog(response.response());
-        return ClientResponseDto.builder()
-                .script(response.response())
-                .time(time)
-                .build();
+        Optional<String> response = behaviorService.checkResponseToCaption(caption);
+        if (response.isPresent()) {
+            String reply = response.get();
+            long time = System.currentTimeMillis() - start;
+            logger.sendCaptionReplyLog(reply);
+            return ClientResponseDto.builder()
+                    .script(reply)
+                    .time(time)
+                    .build();
+        }
+        return null;
     }
 
     private void startBackgroundJob(Runnable runnable) {

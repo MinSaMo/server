@@ -1,6 +1,7 @@
 package com.konkuk.daila.service;
 
 import com.konkuk.daila.domain.dao.Todolist;
+import com.konkuk.daila.domain.dto.response.CheckResponseToCaptionDto;
 import com.konkuk.daila.domain.dto.response.EmergencyCheckDto;
 import com.konkuk.daila.domain.dto.response.TodoListResponseDto;
 import dev.ai4j.openai4j.chat.ChatCompletionRequest;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -32,6 +34,19 @@ public class BehaviorService {
         return gptService.ask(request, EmergencyCheckDto.class);
     }
 
+    public Optional<String> checkResponseToCaption(String caption) {
+        Prompt prompt = promptManager.getCheckResponseToCaptionPrompt();
+        ChatCompletionRequest request = gptService.request()
+                .addSystemMessage(prompt.getScript())
+                .addUserMessage(caption)
+                .topP(prompt.getTopP())
+                .temperature(prompt.getTemperature())
+                .build();
+
+        CheckResponseToCaptionDto response = gptService.ask(request, CheckResponseToCaptionDto.class);
+        return Optional.of(response.response());
+    }
+
     public List<String> checkTodoByCaption(String caption, Long memberId) {
 
         List<Todolist> todoList = todolistService.findAllByMemberId(memberId);
@@ -45,7 +60,7 @@ public class BehaviorService {
                 .temperature(checkTodoListPrompt.getTemperature())
                 .build();
 
-        TodoListResponseDto response = gptService.ask(request, TodoListResponseDto.class);
+        TodoListResponseDto response = gptService.askToSub(request, TodoListResponseDto.class);
         return response.complete().stream()
                 .map(todolistService::completeTodolist)
                 .toList();
