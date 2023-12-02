@@ -14,6 +14,11 @@ gpt:
       Which of the three should I answer to the user question above?
       Please Answer only in the JSON form of { \"answerTypeIndex\": <INT> }, AnswerTypeIndex should have a value between 1 and 3.
       Never answer except in JSON format.
+    classify: |
+      Analyze the given conversation snippet and classify it as 'daily' or 'non-daily'.
+      - If the snippet is a casual, everyday interaction, classify it as '0' and allow the conversation to continue within the 'Daily' section.
+      - If the snippet is a request for information, classify it as '1'.
+      Response format : {"classification": <0 for daily, 1 for non-daily>}.
     information: |
       Your role is to analyze the user's conversation to extract key information pertaining to 'todoList', 'diseases', and 'preferredFoods'. Carefully analyze each category of information.
         - "todoList": Comprises objects with a "deadline" (Date) and "description" (Text). Extract tasks from the conversation, calculate deadlines based on $currentTime, and add only new items.
