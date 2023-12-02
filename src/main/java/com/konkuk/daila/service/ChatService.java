@@ -2,6 +2,7 @@ package com.konkuk.daila.service;
 
 import com.konkuk.daila.domain.dto.response.DialogResponseDto;
 import com.konkuk.daila.domain.dto.response.IntenseResponseDto;
+import com.konkuk.daila.domain.dto.response.MessageClassifyDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.Message;
@@ -46,6 +47,23 @@ public class ChatService {
                 .build();
         IntenseResponseDto response = gptService.ask(intenseRequest, IntenseResponseDto.class);
         return ChatType.of(response.answerTypeIndex());
+    }
+
+    // classify message
+    public boolean isAllowedMessage(String script) {
+        Prompt classifyPrompt = promptManager.getClassifyPrompt();
+        ChatCompletionRequest request = gptService.request()
+                .addSystemMessage(classifyPrompt.getScript())
+                .addUserMessage(script)
+                .topP(classifyPrompt.getTopP())
+                .temperature(classifyPrompt.getTemperature())
+                .build();
+        try {
+            MessageClassifyDto result = gptService.ask(request, MessageClassifyDto.class);
+            return result.classification().equals(0);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     // response with daily

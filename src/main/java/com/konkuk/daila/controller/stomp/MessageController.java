@@ -77,6 +77,14 @@ public class MessageController {
         String script = dto.getScript();
         logger.sendScriptLog(script, memberId, dialogId);
 
+        if (!chatService.isAllowedMessage(script)) {
+            long time = System.currentTimeMillis() - start;
+            return ClientResponseDto.builder()
+                    .script("죄송합니다, 저희는 알 수 없는 정보에 대해선 알려드릴 수 없습니다.")
+                    .time(time)
+                    .build();
+        }
+
         ChatType chatType = chatService.determineIntention(script);
         logger.sendIntenseLog(chatType);
 

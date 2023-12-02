@@ -19,6 +19,7 @@ public class PromptManager {
     private final Prompt normalLLMPrompt;
     private final Prompt duplicatePrompt;
     private final Prompt checkResponseToCaptionPrompt;
+    private final Prompt classifyPrompt;
 
 
     public PromptManager(
@@ -30,7 +31,8 @@ public class PromptManager {
             @Value("${gpt.script.check-emergency}") String emergencyScript,
             @Value("${gpt.script.llm}") String llmScript,
             @Value("${gpt.script.duplicate}") String duplicate,
-            @Value("${gpt.script.check-response}") String checkResponse
+            @Value("${gpt.script.check-response}") String checkResponse,
+            @Value("${gpt.script.classify}") String classify
     ) {
         intensePrompt = Prompt.builder()
                 .script(intenseScript)
@@ -72,6 +74,11 @@ public class PromptManager {
                 .script(checkResponse)
                 .topP(0.3)
                 .temperature(0.4)
+                .build();
+        classifyPrompt = Prompt.builder()
+                .script(classify)
+                .topP(0.1)
+                .temperature(0.2)
                 .build();
     }
 
