@@ -6,6 +6,7 @@ import com.konkuk.daila.domain.dao.Todolist;
 import com.konkuk.daila.domain.dao.TodolistRepository;
 import com.konkuk.daila.domain.dao.member.*;
 import com.konkuk.daila.global.logger.UserInformationLogProperty;
+import com.konkuk.daila.service.MailService;
 import com.konkuk.daila.service.dialog.DialogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class DatabaseInitConfiguration {
     private final MemberDiseaseRepository memberDiseaseRepository;
 
     private final DialogService dialogManager;
+    private final MailService mailService;
     private final UserInformationLogProperty logProperty;
 
     @PostConstruct
@@ -40,6 +42,8 @@ public class DatabaseInitConfiguration {
                 .build());
         dialogManager.setMemberId(member.getId());
         logProperty.setMemberId(member.getId());
+        mailService.setMemberId(member.getId());
+
         dialogManager.setGptHistory(new ArrayList<>());
 
         foodRepository.save(foodRepository.save(PreferredFood.builder()

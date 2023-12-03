@@ -38,8 +38,8 @@ public class DashboardLogger {
         aiLogProperty.setUuid(UUID.randomUUID());
 
         template.convertAndSend(TopicType.LOG_AI_CAPTION.getPath(), aiLogProperty.getCaptionLogMessage());
-        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(),
-                ClientResponseDto.ofBehavior(caption));
+//        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(),
+//                ClientResponseDto.ofBehavior(caption));
     }
 
     public void sendEmergencyCheckLog() {

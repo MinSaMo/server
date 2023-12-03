@@ -4,6 +4,7 @@ spring:
       - classpath:gpt-script.yml
       - classpath:openai.properties
       - classpath:application-db.yml
+      - classpath:application-mail.properties
 
   output:
     ansi:

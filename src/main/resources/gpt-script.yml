@@ -16,7 +16,7 @@ gpt:
       Never answer except in JSON format.
     classify: |
       Analyze the given conversation snippet and classify it as 'daily' or 'non-daily'.
-      - If the snippet is a casual, everyday interaction, classify it as '0' and allow the conversation to continue within the 'Daily' section.
+      - If the snippet is a casual, asking for information about to-do, foods and user's disease, classify it as '0',
       - If the snippet is a request for information, classify it as '1'.
       Response format : {"classification": <0 for daily, 1 for non-daily>}.
     classify_users: |
@@ -26,20 +26,16 @@ gpt:
       Response format : {"type": <int>}.
     information: |
       Your role is to analyze the user's conversation to extract key information pertaining to 'todoList', 'diseases', and 'preferredFoods'. Carefully analyze each category of information.
-        - "todoList": Comprises objects with a "deadline" (Date) and "description" (Text). Extract tasks from the conversation, calculate deadlines based on $currentTime, and add only new items.
-        - "diseases": A list of disease names. Identify any diseases mentioned by the user and add only new diseases to the list.
-        - "preferredFoods": A list of foods preferred by the user. Add only new foods that the user specifically mentions as favorites.
-      
-        When processing the user's input:
-      
-        If the input contains new information not found in 'existing_information': 
-            Include this new data in your JSON response:
-            {
-                "diseases": [<String> or null],
-                "todoList": [{"deadline": <DATE>, "description": <String>} or null],
-                "preferredFoods": [<String> or null]
-            }
-        Use 'yyyy-MM-dd hh:mm' as the date format for "deadline".
+      - "todoList": Comprises objects with a "deadline" (Date) and "description" (Text). Extract user's to-do from user's talk, calculate deadlines based on $currentTime
+      - "diseases": A list of disease names. Identify any diseases mentioned by the user.
+      - "preferredFoods": A list of any foods preferred mentioned by the user.
+      Include this new data in your JSON response:
+                  {
+                      "diseases": [<String> or null],
+                      "todoList": [{"deadline": <DATE>, "description": <String>} or null],
+                      "preferredFoods": [<String> or null]
+                  }
+      Use 'yyyy-MM-dd hh:mm' as the date format for "deadline".
     duplicate: |
       Analyze the provided existing_information to remove any duplicate entries. 
 
