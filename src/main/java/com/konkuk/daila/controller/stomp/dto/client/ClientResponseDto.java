@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ClientResponseDto {
     public final static String SENDER_USER = "user";
+    public final static String SENDER_CAPTION = "caption";
     public final static String SENDER_ASSISTANT = "assistant";
 
     private String script;
@@ -34,6 +35,14 @@ public class ClientResponseDto {
     public static ClientResponseDto ofUser(String script) {
         ClientResponseDto response = ClientResponseDto.builder()
                 .script(script)
+                .build();
+        response.setSender(SENDER_USER);
+        return response;
+    }
+
+    public static ClientResponseDto ofBehavior(String caption) {
+        ClientResponseDto response = ClientResponseDto.builder()
+                .script(caption)
                 .build();
         response.setSender(SENDER_USER);
         return response;

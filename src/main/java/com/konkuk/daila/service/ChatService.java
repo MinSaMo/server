@@ -3,6 +3,7 @@ package com.konkuk.daila.service;
 import com.konkuk.daila.domain.dto.response.DialogResponseDto;
 import com.konkuk.daila.domain.dto.response.IntenseResponseDto;
 import com.konkuk.daila.domain.dto.response.MessageClassifyDto;
+import com.konkuk.daila.domain.dto.response.ResponseClassifyDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.service.dialog.DialogService;
 import com.konkuk.daila.service.dialog.Message;
@@ -87,5 +88,19 @@ public class ChatService {
         DialogResponseDto response = gptService.ask(request, DialogResponseDto.class);
         dialogService.addMessage(script, response.response());
         return response;
+    }
+
+    public ResponseClassifyDto classifyUserMessage(String script) {
+        log.info("Emergency Response Check with script : {}", script);
+        Prompt prompt = promptManager.getClassifyUserMessagePrompt();
+        ChatCompletionRequest request = gptService.request()
+                .addSystemMessage(prompt.getScript())
+                .addUserMessage(script)
+                .topP(prompt.getTopP())
+                .temperature(prompt.getTemperature())
+                .build();
+        ResponseClassifyDto classifyDto = gptService.ask(request, ResponseClassifyDto.class);
+        log.info("Emergency classify : {}", classifyDto);
+        return classifyDto;
     }
 }

@@ -5,6 +5,7 @@ import com.konkuk.daila.controller.stomp.dto.client.ClientRequestDto;
 import com.konkuk.daila.controller.stomp.dto.client.ClientResponseDto;
 import com.konkuk.daila.domain.dto.response.DialogResponseDto;
 import com.konkuk.daila.domain.dto.response.EmergencyCheckDto;
+import com.konkuk.daila.domain.dto.response.ResponseClassifyDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.global.thread.EmergencyCheckRunner;
 import com.konkuk.daila.global.thread.TodolistCheckRunner;
@@ -33,8 +34,9 @@ public class MessageController {
     private final BehaviorService behaviorService;
     private final ObjectProvider<EmergencyCheckRunner> emergencyCheckerProvider;
     private final ObjectProvider<TodolistCheckRunner> todolistCheckerProvider;
-
     private final DashboardLogger logger;
+
+    private EmergencyCheckRunner emergencyChecker;
 
     @MessageMapping("/gpt")
     @SendTo("/topic/service/gpt")
@@ -77,10 +79,24 @@ public class MessageController {
         String script = dto.getScript();
         logger.sendScriptLog(script, memberId, dialogId);
 
+        if (emergencyChecker != null) {
+            ResponseClassifyDto classifyDto = chatService.classifyUserMessage(script);
+            if (classifyDto.isYes()) {
+                log.info("emergency response : yes");
+                emergencyChecker.forcedRunEmergencyProcess();
+                emergencyChecker = null;
+                return null;
+            } else if (classifyDto.isNo()) {
+                log.info("emergency response : no");
+                emergencyChecker.cancelEmergencyProcess();
+                emergencyChecker = null;
+            }
+        }
+
         if (!chatService.isAllowedMessage(script)) {
             long time = System.currentTimeMillis() - start;
             return ClientResponseDto.builder()
-                    .script("죄송합니다, 저희는 알 수 없는 정보에 대해선 알려드릴 수 없습니다.")
+                    .script("죄송합니다, 저희는 알 수 없는 정보에 대해선 알려 드릴 수 없습니다.")
                     .time(time)
                     .build();
         }
@@ -110,7 +126,11 @@ public class MessageController {
     @SendTo(value = "/topic/service/chat")
     public ClientResponseDto dialogWithCaption(
             AiRequestDto dto
-    ) {
+    ) throws InterruptedException {
+        Random random = new Random();
+        int randomInterval = random.nextInt(3000) + 4000;
+        Thread.sleep(randomInterval);
+
         long start = System.currentTimeMillis();
         Long memberId = dialogService.getMemberId();
 
@@ -119,7 +139,7 @@ public class MessageController {
 
         EmergencyCheckDto emergencyResult = behaviorService.checkEmergency(caption);
         if (emergencyResult.isDetected()) {
-            EmergencyCheckRunner emergencyChecker = getEmergencyChecker(caption);
+            emergencyChecker = getEmergencyChecker(caption);
             startBackgroundJob(emergencyChecker);
             return null;
         }
