@@ -51,8 +51,8 @@ public class PromptManager {
                 .build();
         infoPrompt = Prompt.builder()
                 .script(infoScript)
-                .topP(0.3)
-                .temperature(0.1)
+                .topP(0)
+                .temperature(0.2)
                 .build();
         checkTodoListPrompt = Prompt.builder()
                 .script(todoScript)

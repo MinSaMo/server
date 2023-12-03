@@ -18,8 +18,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -127,12 +131,12 @@ public class DialogService {
         Prompt informationPrompt = promptManager.getInfoPrompt();
         Prompt duplicatePrompt = promptManager.getDuplicatePrompt();
 
-//        Map<String, String> systemParamMap = new HashMap<>();
-//        systemParamMap.put("$currentTime", LocalDateTime.now().toString());
-//        String systemScript = promptManager.setPromptParams(informationPrompt.getScript());
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("$currentTime", DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss").format(LocalDateTime.now()));
+        String script = promptManager.setPromptParams(informationPrompt.getScript(), paramMap);
 
         ChatCompletionRequest request = wrapWithHistory(gptService.request())
-                .addSystemMessage(informationPrompt.getScript())
+                .addSystemMessage(script)
                 .topP(informationPrompt.getTopP())
                 .temperature(informationPrompt.getTemperature())
                 .build();
