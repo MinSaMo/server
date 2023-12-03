@@ -4,12 +4,14 @@ import com.konkuk.daila.controller.stomp.dto.client.ClientEmergencyCheckDto;
 import com.konkuk.daila.controller.stomp.dto.client.ClientResponseDto;
 import com.konkuk.daila.global.logger.DashboardLogger;
 import com.konkuk.daila.global.logger.TopicType;
+import com.konkuk.daila.service.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.mail.MessagingException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,6 +22,7 @@ public class EmergencyCheckRunner implements Runnable {
 
     private final SimpMessagingTemplate template;
     private final DashboardLogger logger;
+    private final MailService mailService;
     private final int timeOut = 10000;
 
     @Setter
@@ -71,13 +74,16 @@ public class EmergencyCheckRunner implements Runnable {
                 .build();
         logger.sendEmergencyOccurLog();
         template.convertAndSend(TopicType.SERVICE_REPLY.getPath(), dto);
-        // send mail to ksun4131@gmail.com
     }
 
     public void forcedRunEmergencyProcess() {
         cancelTimer();
         sendAlarmMessage();
-        // send Mail
+        try {
+            mailService.sendMail();
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void cancelEmergencyProcess() {
