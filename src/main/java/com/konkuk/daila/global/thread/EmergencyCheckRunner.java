@@ -24,11 +24,11 @@ public class EmergencyCheckRunner implements Runnable {
 
     @Setter
     private String caption;
+    private Timer timer;
 
     @Override
     public void run() {
-        assert caption != null;
-        Timer timer = new Timer();
+        timer = new Timer();
         sendCheckMessage();
         timer.schedule(sendEmergencyAlarm(), timeOut);
     }
@@ -61,15 +61,31 @@ public class EmergencyCheckRunner implements Runnable {
                 .time(0L)
                 .build();
         logger.sendEmergencyCheckLog();
-        template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
+        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(), dto);
     }
 
     private void sendAlarmMessage() {
         ClientResponseDto dto = ClientResponseDto.builder()
-                .script("응급상황 조치 실행")
+                .script("응급상황으로 판별되어 응급상황 조치 프로세스를 실행합니다.")
                 .time(0L)
                 .build();
         logger.sendEmergencyOccurLog();
-        template.convertAndSend(TopicType.SERVICE_EMERGENCY.getPath(), dto);
+        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(), dto);
+        // send mail to ksun4131@gmail.com
+    }
+
+    public void forcedRunEmergencyProcess() {
+        cancelTimer();
+        sendAlarmMessage();
+        // send Mail
+    }
+
+    public void cancelEmergencyProcess() {
+        cancelTimer();
+    }
+
+    private void cancelTimer() {
+        timer.cancel();
+        timer.purge();
     }
 }

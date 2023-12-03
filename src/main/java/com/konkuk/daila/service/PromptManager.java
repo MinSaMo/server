@@ -20,6 +20,7 @@ public class PromptManager {
     private final Prompt duplicatePrompt;
     private final Prompt checkResponseToCaptionPrompt;
     private final Prompt classifyPrompt;
+    private final Prompt classifyUserMessagePrompt;
 
 
     public PromptManager(
@@ -32,7 +33,8 @@ public class PromptManager {
             @Value("${gpt.script.llm}") String llmScript,
             @Value("${gpt.script.duplicate}") String duplicate,
             @Value("${gpt.script.check-response}") String checkResponse,
-            @Value("${gpt.script.classify}") String classify
+            @Value("${gpt.script.classify}") String classify,
+            @Value("${gpt.script.classify_users}") String yesOrNo
     ) {
         intensePrompt = Prompt.builder()
                 .script(intenseScript)
@@ -77,6 +79,11 @@ public class PromptManager {
                 .build();
         classifyPrompt = Prompt.builder()
                 .script(classify)
+                .topP(0.1)
+                .temperature(0.2)
+                .build();
+        classifyUserMessagePrompt = Prompt.builder()
+                .script(yesOrNo)
                 .topP(0.1)
                 .temperature(0.2)
                 .build();
