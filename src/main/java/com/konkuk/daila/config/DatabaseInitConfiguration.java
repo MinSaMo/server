@@ -7,6 +7,7 @@ import com.konkuk.daila.domain.dao.TodolistRepository;
 import com.konkuk.daila.domain.dao.member.*;
 import com.konkuk.daila.global.logger.UserInformationLogProperty;
 import com.konkuk.daila.service.MailService;
+import com.konkuk.daila.service.TodolistService;
 import com.konkuk.daila.service.dialog.DialogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class DatabaseInitConfiguration {
     private final DialogService dialogManager;
     private final MailService mailService;
     private final UserInformationLogProperty logProperty;
+    private final TodolistService todolistService;
 
     @PostConstruct
     @Transactional
@@ -57,12 +59,13 @@ public class DatabaseInitConfiguration {
 
         Todolist todolist = todolistRepository.save(Todolist.builder()
                 .description("일곱 난쟁이팀 응원하기")
-                .deadline(LocalDateTime.of(2023, 11, 3, 17, 0))
+                .deadline(LocalDateTime.of(2023, 12, 4, 1, 55))
                 .build());
-        memberTodolistRepository.save(MemberTodolist.builder()
+        MemberTodolist saved = memberTodolistRepository.save(MemberTodolist.builder()
                 .todolist(todolist)
                 .member(member)
                 .build());
+        todolistService.scheduleTodoList(saved.getTodolist().getId());
 
         Disease dis = diseaseRepository.save(Disease.builder()
                 .name("조현정동장애")

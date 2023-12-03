@@ -21,6 +21,7 @@ public class PromptManager {
     private final Prompt checkResponseToCaptionPrompt;
     private final Prompt classifyPrompt;
     private final Prompt classifyUserMessagePrompt;
+    private final Prompt todoAlarmPrompt;
 
 
     public PromptManager(
@@ -34,7 +35,8 @@ public class PromptManager {
             @Value("${gpt.script.duplicate}") String duplicate,
             @Value("${gpt.script.check-response}") String checkResponse,
             @Value("${gpt.script.classify}") String classify,
-            @Value("${gpt.script.classify_users}") String yesOrNo
+            @Value("${gpt.script.classify_users}") String yesOrNo,
+            @Value("${gpt.script.todo-script}") String todoAlarm
     ) {
         intensePrompt = Prompt.builder()
                 .script(intenseScript)
@@ -86,6 +88,11 @@ public class PromptManager {
                 .script(yesOrNo)
                 .topP(0.1)
                 .temperature(0.2)
+                .build();
+        todoAlarmPrompt = Prompt.builder()
+                .script(todoAlarm)
+                .topP(0.3)
+                .temperature(0.3)
                 .build();
     }
 

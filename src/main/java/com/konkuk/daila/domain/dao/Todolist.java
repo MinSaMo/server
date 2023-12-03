@@ -29,8 +29,7 @@ public class Todolist {
     @Override
     public String toString() {
         return "{" +
-                "id:" + id +
-                ", description:'" + description + '\'' +
+                "description:'" + description + '\'' +
                 ", deadline:" + deadline +
                 '}';
     }

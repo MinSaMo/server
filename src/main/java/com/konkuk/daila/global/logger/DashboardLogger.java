@@ -110,7 +110,14 @@ public class DashboardLogger {
     public void sendReplyLog(String reply) {
         clientLogProperty.setReply(reply);
         template.convertAndSend(TopicType.LOG_CLIENT_REPLY.getPath(), clientLogProperty.getReplyLogMessage());
-        template.convertAndSend(TopicType.LOG_CHAT.getPath(),new ChatLog(ChatLog.SENDER_DAILA,reply));
+        template.convertAndSend(TopicType.LOG_CHAT.getPath(), new ChatLog(ChatLog.SENDER_DAILA, reply));
+    }
+
+    public void sendReply(String reply) {
+        template.convertAndSend(TopicType.SERVICE_REPLY.getPath(), ClientResponseDto.builder()
+                .script(reply)
+                .time(0L)
+                .build());
     }
 
 }

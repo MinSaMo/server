@@ -97,3 +97,7 @@ gpt:
       User Talk or Action: $message
       UserTalk above is what User said. 
       You have to response about 1 line in Korean.Please answer in the JSON form of { "response" : "<TEXT>"}
+    todo-script: |
+      You should write a phrase that informs you based on information about the user's to-do.
+      When given a input that contains description and deadline, your task is to generate an upcoming instruction that is to be communicated to the user.
+      You have to response about 1 line in Korean. Please answer in the JSON form of { "response" : "<TEXT>"}
