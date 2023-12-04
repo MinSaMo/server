@@ -136,6 +136,7 @@ public class MessageController {
 
         String caption = dto.getCaption();
         logger.sendCaptionLog(caption, memberId);
+        log.info("[Caption Entered] : {}", dto.getCaption());
 
         EmergencyCheckDto emergencyResult = behaviorService.checkEmergency(caption);
         if (emergencyResult.isDetected()) {

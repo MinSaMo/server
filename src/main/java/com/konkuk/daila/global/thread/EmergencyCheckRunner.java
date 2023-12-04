@@ -40,7 +40,7 @@ public class EmergencyCheckRunner implements Runnable {
         return new TimerTask() {
             @Override
             public void run() {
-                sendAlarmMessage();
+                forcedRunEmergencyProcess();
             }
         };
     }

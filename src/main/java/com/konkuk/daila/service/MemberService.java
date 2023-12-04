@@ -120,11 +120,11 @@ public class MemberService {
     @Transactional
     public void addFood(String foodName, Long memberId) {
         Member member = findMemberById(memberId);
-        PreferredFood food = PreferredFood.builder()
-                .name(foodName)
-                .member(member)
-                .build();
         if (!preferredFoodRepository.existsByNameAndMemberId(foodName, memberId)) {
+            PreferredFood food = PreferredFood.builder()
+                    .name(foodName)
+                    .member(member)
+                    .build();
             preferredFoodRepository.save(food);
         }
     }
@@ -144,6 +144,7 @@ public class MemberService {
                 .toList();
 
         List<Todolist> checklist = member.getChecklistList().stream()
+                .filter(item -> !item.getIsCompleted())
                 .map(MemberTodolist::getTodolist)
                 .toList();
 

@@ -57,7 +57,8 @@ public class TodolistService {
                 .todolist(todolist)
                 .member(member)
                 .build();
-        memberTodolistRepository.save(memberChecklist);
+        MemberTodolist saved = memberTodolistRepository.save(memberChecklist);
+        scheduleTodoList(saved.getTodolist().getId());
         return todolist;
     }
 

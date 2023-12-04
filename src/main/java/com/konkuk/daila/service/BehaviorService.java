@@ -62,7 +62,7 @@ public class BehaviorService {
 
         TodoListResponseDto response = gptService.askToSub(request, TodoListResponseDto.class);
         return response.complete().stream()
-                .map(todolistService::completeTodolist)
+                .map(id -> todolistService.completeTodolist(todoList.get(id.intValue()-1).getId()))
                 .toList();
     }
 
