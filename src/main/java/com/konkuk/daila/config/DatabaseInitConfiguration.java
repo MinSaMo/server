@@ -1,6 +1,5 @@
 package com.konkuk.daila.config;
 
-import com.konkuk.daila.domain.dao.Disease;
 import com.konkuk.daila.domain.dao.DiseaseRepository;
 import com.konkuk.daila.domain.dao.Todolist;
 import com.konkuk.daila.domain.dao.TodolistRepository;
@@ -67,14 +66,14 @@ public class DatabaseInitConfiguration {
                 .build());
         todolistService.scheduleTodoList(saved.getTodolist().getId());
 
-        Disease dis = diseaseRepository.save(Disease.builder()
-                .name("조현정동장애")
-                .build());
-
-        memberDiseaseRepository.save(MemberDisease.builder()
-                .disease(dis)
-                .member(member)
-                .build());
+//        Disease dis = diseaseRepository.save(Disease.builder()
+//                .name("조현정동장애")
+//                .build());
+//
+//        memberDiseaseRepository.save(MemberDisease.builder()
+//                .disease(dis)
+//                .member(member)
+//                .build());
 
         logProperty.load();
     }
