@@ -68,6 +68,8 @@ public class PromptManager {
                 .build();
         normalLLMPrompt = Prompt.builder()
                 .script(llmScript)
+                .topP(0.3)
+                .temperature(0.4)
                 .build();
         duplicatePrompt = Prompt.builder()
                 .script(duplicate)

@@ -30,8 +30,11 @@ public class ChatService {
     // response with LLM
     public String responseWithLLM(String script) {
         dialogService.addChatToGpt(Message.ofUser(script));
-        ChatCompletionRequest request = dialogService.wrapWithLLMHistory(gptService.request()
-                        .addSystemMessage(promptManager.getNormalLLMPrompt().getScript()))
+        Prompt prompt = promptManager.getNormalLLMPrompt();
+        ChatCompletionRequest request = dialogService.wrapWithLLMHistory(gptService.request())
+                .addSystemMessage(prompt.getScript())
+                .topP(prompt.getTopP())
+                .temperature(prompt.getTemperature())
                 .build();
         DialogResponseDto result = gptService.askToSub(request, DialogResponseDto.class);
         dialogService.addChatToGpt(Message.ofAssistant(result.response()));
