@@ -43,6 +43,7 @@ public class MailService {
         Context context = new Context();
         context.setVariable("patientName", "Kwon Sun jae");
         context.setVariable("patientAge", "24");
+        context.setVariable("address", "서울특별시 광진구 능동로 120 건국대학교 공과대학");
         context.setVariable("disease", diseasesStr);
         context.setVariable("photoUrl", "http://117.16.136.172:3000/emergency");
         context.setVariable("occurrenceDateTime", DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss").format(LocalDateTime.now()));
